@@ -1,30 +1,56 @@
-# Volunteer Crux landing page
+🤝 Volunteer Crux
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+Connecting Volunteers with NGOs to create real impact.
+A full-stack platform designed for the Indian context (Hyderabad, Bengaluru, Mumbai) to streamline volunteer recruitment and event management.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/bhargav-kvs-projects/v0-volunteer-crux-landing-page)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/ivIcVLBgqi0)
+🚀 Key Features
 
-## Overview
+🔐 Secure Authentication:** Full Sign Up/Login system using **NextAuth.js** (Credentials + bcrypt).
+🌏 Localized Events:** tailored for Indian cities with real-time database fetching.
+⚡ Real-Time Data:** Events and user data powered by **MongoDB Atlas**.
+🎨 Modern UI:** Built with **Tailwind CSS** and **shadcn/ui** for a clean, responsive experience.
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+## 🛠️ Tech Stack
 
-## Deployment
+* **Frontend:** Next.js 15 (App Router), React, Tailwind CSS
+* **Backend:** Next.js API Routes (Serverless)
+* **Database:** MongoDB (via Mongoose)
+* **Auth:** NextAuth.js
 
-Your project is live at:
+---
 
-**[https://vercel.com/bhargav-kvs-projects/v0-volunteer-crux-landing-page](https://vercel.com/bhargav-kvs-projects/v0-volunteer-crux-landing-page)**
+## 🏃‍♂️ Quick Start
 
-## Build your app
+**1. Clone the repository**
+bash
+git clone [https://github.com/bhargav-kv-05/volunteer-crux-micro-project.git](https://github.com/bhargav-kv-05/volunteer-crux-micro-project.git)
+cd volunteer-crux-micro-project
 
-Continue building your app on:
+## Install dependencies
 
-**[https://v0.app/chat/ivIcVLBgqi0](https://v0.app/chat/ivIcVLBgqi0)**
+Bash
+npm install
 
-## How It Works
+## Set up Environment Variables Create a .env file in the root folder and add the following:
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+Code snippet
+# Database Connection
+MONGODB_URI=your_mongodb_connection_string
+# Authentication Secrets
+NEXTAUTH_SECRET=your_random_secret_key
+NEXTAUTH_URL=http://localhost:3000
+
+## Run the App
+
+Bash
+npm run dev
+
+Open http://localhost:3000 to see the app live!
+
+📂 Project Structure
+/app - Main pages (Dashboard, Login, Register).
+/components - Reusable UI components (Event Cards, Headers).
+/lib - Database connection logic.
+/models - MongoDB Schemas (User, Event).
+/api - Backend routes (Auth, Event fetching).
+Built with ❤️ by Bhargav KV
