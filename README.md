@@ -28,22 +28,25 @@ cd volunteer-crux-micro-project
 
 ## Install dependencies
 
-Bash
+```bash
 npm install
+```
 
 ## Set up Environment Variables Create a .env file in the root folder and add the following:
 
-Code snippet
+```Code snippet
 # Database Connection
 MONGODB_URI=your_mongodb_connection_string
 # Authentication Secrets
 NEXTAUTH_SECRET=your_random_secret_key
 NEXTAUTH_URL=http://localhost:3000
+```
 
 ## Run the App
 
-Bash
+```Bash
 npm run dev
+```
 
 Open http://localhost:3000 to see the app live!
 
