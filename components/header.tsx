@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Sprout } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -20,9 +21,11 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" className="text-sm font-medium">
-            Login
-          </Button>
+          <Link href="/login">
+            <Button variant="ghost" size="sm" className="text-sm font-medium">
+              Login
+            </Button>
+          </Link>
           <Button size="sm" className="text-sm font-medium">
             Join as NGO
           </Button>

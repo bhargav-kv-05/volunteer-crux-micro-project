@@ -1,74 +1,103 @@
-import { Calendar, MapPin } from "lucide-react"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+"use client";
 
-const events = [
-  {
-    id: 1,
-    title: "Community Beach Cleanup",
-    date: "Jan 15, 2026",
-    location: "Santa Monica Beach",
-    image: "/beach-cleanup-volunteers.png",
-    skills: ["Teamwork", "Physical Activity"],
-  },
-  {
-    id: 2,
-    title: "Food Bank Distribution",
-    date: "Jan 18, 2026",
-    location: "Downtown Community Center",
-    image: "/food-bank-volunteers.png",
-    skills: ["Organization", "Customer Service"],
-  },
-  {
-    id: 3,
-    title: "Tree Planting Drive",
-    date: "Jan 22, 2026",
-    location: "City Park West",
-    image: "/tree-planting-volunteers.png",
-    skills: ["Environmental", "Teamwork"],
-  },
-]
+import { useEffect, useState } from "react";
+import { Calendar, MapPin, Users, ArrowRight, Loader2 } from "lucide-react";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
+interface Event {
+  _id: string;
+  title: string;
+  date: string;
+  location: string;
+  image: string;
+  skills: string[];
+  spots: number;
+  filled: number;
+}
 
 export function VolunteerView() {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchEvents() {
+      try {
+        const res = await fetch("/api/events");
+        const data = await res.json();
+        setEvents(data);
+      } catch (error) {
+        console.error("Failed to fetch events:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchEvents();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+        <span className="ml-2 text-gray-500">Finding opportunities near you...</span>
+      </div>
+    );
+  }
+
   return (
     <section>
-      <h2 className="mb-6 text-2xl font-bold text-gray-900">Available Opportunities</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">Available Opportunities</h2>
+        <span className="text-sm text-gray-500">Based on your location</span>
+      </div>
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {events.map((event) => (
-          <Card key={event.id} className="overflow-hidden border-gray-200">
-            <div className="aspect-video w-full overflow-hidden bg-gray-100">
-              <img src={event.image || "/placeholder.svg"} alt={event.title} className="h-full w-full object-cover" />
+          <Card key={event._id} className="overflow-hidden border-gray-200 hover:shadow-md transition-all group">
+            <div className="h-48 overflow-hidden relative">
+              <img
+                src={event.image}
+                alt={event.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <Badge className="absolute top-3 right-3 bg-white text-black hover:bg-white/90">
+                {event.filled}/{event.spots} filled
+              </Badge>
             </div>
-            <CardHeader className="pb-3">
-              <h3 className="text-lg font-semibold text-gray-900">{event.title}</h3>
+
+            <CardHeader className="p-5 pb-2">
+              <div className="flex gap-2 mb-2">
+                {event.skills.map((skill) => (
+                  <span key={skill} className="text-[10px] font-bold uppercase tracking-wider text-green-700 bg-green-50 px-2 py-1 rounded-sm">
+                    {skill}
+                  </span>
+                ))}
+              </div>
+              <h3 className="font-bold text-lg leading-tight">{event.title}</h3>
             </CardHeader>
-            <CardContent className="space-y-3 pb-4">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Calendar className="h-4 w-4" />
+
+            <CardContent className="p-5 py-2 space-y-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-gray-400" />
                 {event.date}
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <MapPin className="h-4 w-4" />
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-gray-400" />
                 {event.location}
               </div>
-              <div>
-                <p className="mb-2 text-xs font-medium text-gray-700">Skills Needed:</p>
-                <div className="flex flex-wrap gap-2">
-                  {event.skills.map((skill) => (
-                    <Badge key={skill} variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
             </CardContent>
-            <CardFooter>
-              <Button className="w-full">Register</Button>
+
+            <CardFooter className="p-5 pt-4">
+              <Button className="w-full bg-gray-900 hover:bg-green-700 text-white group-hover:bg-green-600 transition-colors">
+                Register Now
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
             </CardFooter>
           </Card>
         ))}
       </div>
     </section>
-  )
+  );
 }
