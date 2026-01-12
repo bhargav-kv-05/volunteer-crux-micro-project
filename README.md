@@ -50,10 +50,11 @@ npm run dev
 
 Open http://localhost:3000 to see the app live!
 
-📂 Project Structure
-/app - Main pages (Dashboard, Login, Register).
-/components - Reusable UI components (Event Cards, Headers).
-/lib - Database connection logic.
-/models - MongoDB Schemas (User, Event).
-/api - Backend routes (Auth, Event fetching).
+## 📂 Project Structure
+* **/app - Main pages (Dashboard, Login, Register).
+* **/components - Reusable UI components (Event Cards, Headers).
+* **/lib - Database connection logic.
+* **/models - MongoDB Schemas (User, Event).
+* **/api - Backend routes (Auth, Event fetching).
+
 Built with ❤️ by Bhargav KV
