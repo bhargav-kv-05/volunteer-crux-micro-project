@@ -1,14 +1,14 @@
-🤝 Volunteer Crux
+# 🤝 Volunteer Crux
 
-Connecting Volunteers with NGOs to create real impact.
+**Connecting Volunteers with NGOs to create real impact.**
 A full-stack platform designed for the Indian context (Hyderabad, Bengaluru, Mumbai) to streamline volunteer recruitment and event management.
 
-🚀 Key Features
+## 🚀 Key Features
 
-🔐 Secure Authentication:** Full Sign Up/Login system using **NextAuth.js** (Credentials + bcrypt).
-🌏 Localized Events:** tailored for Indian cities with real-time database fetching.
-⚡ Real-Time Data:** Events and user data powered by **MongoDB Atlas**.
-🎨 Modern UI:** Built with **Tailwind CSS** and **shadcn/ui** for a clean, responsive experience.
+* **🔐 Secure Authentication:** Full Sign Up/Login system using **NextAuth.js** (Credentials + bcrypt).
+* **🌏 Localized Events:** tailored for Indian cities with real-time database fetching.
+* **⚡ Real-Time Data:** Events and user data powered by **MongoDB Atlas**.
+* **🎨 Modern UI:** Built with **Tailwind CSS** and **shadcn/ui** for a clean, responsive experience.
 
 ## 🛠️ Tech Stack
 
