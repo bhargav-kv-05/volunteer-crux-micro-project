@@ -1,10 +1,10 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 
-const handler = NextAuth({
+export const authOptions: NextAuthOptions = {
     session: {
         strategy: "jwt",
     },
@@ -40,17 +40,25 @@ const handler = NextAuth({
     ],
     callbacks: {
         async jwt({ token, user }) {
-            if (user) token.role = user.role;
+            if (user) {
+                token.role = user.role;
+                token.id = user.id; // <-- Storing the ID in the token
+            }
             return token;
         },
         async session({ session, token }) {
-            if (session?.user) session.user.role = token.role;
+            if (session?.user) {
+                session.user.role = token.role;
+                session.user.id = token.id as string; // <-- Passing it to the browser
+            }
             return session;
         },
     },
     pages: {
         signIn: "/login",
     },
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
