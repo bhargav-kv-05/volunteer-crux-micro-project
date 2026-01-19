@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 
 export function Hero() {
@@ -14,10 +15,12 @@ export function Hero() {
             difference in your community.
           </p>
           <div className="mt-10 flex items-center justify-center gap-4">
-            <Button size="lg" className="text-base font-semibold">
-              Get Started
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <Link href="/register">
+              <Button size="lg" className="text-base font-semibold">
+                Get Started
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

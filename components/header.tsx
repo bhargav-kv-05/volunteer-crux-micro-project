@@ -26,9 +26,11 @@ export function Header() {
               Login
             </Button>
           </Link>
-          <Button size="sm" className="text-sm font-medium">
-            Join as NGO
-          </Button>
+          <Link href="/register">
+            <Button size="sm" className="text-sm font-medium">
+              Join as NGO
+            </Button>
+          </Link>
         </div>
       </div>
     </header>

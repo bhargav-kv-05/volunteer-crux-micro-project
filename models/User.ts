@@ -25,6 +25,7 @@ const UserSchema = new Schema(
             type: Boolean,
             default: false, // For that "Offline Validation" feature you have
         },
+        skills: [{ type: String }], // Array of skills like ["Environmental", "Teamwork"]
     },
     { timestamps: true } // Automatically adds 'createdAt' and 'updatedAt'
 );

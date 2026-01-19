@@ -42,14 +42,16 @@ export const authOptions: NextAuthOptions = {
         async jwt({ token, user }) {
             if (user) {
                 token.role = user.role;
-                token.id = user.id; // <-- Storing the ID in the token
+                token.id = user.id;
+                token.name = user.name; // Explicitly persisting name
             }
             return token;
         },
         async session({ session, token }) {
             if (session?.user) {
                 session.user.role = token.role;
-                session.user.id = token.id as string; // <-- Passing it to the browser
+                session.user.id = token.id as string;
+                session.user.name = token.name; // Explicitly passing name
             }
             return session;
         },
