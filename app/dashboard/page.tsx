@@ -1,11 +1,9 @@
-import { VolunteerView } from "@/components/dashboard/volunteer-view"
-// import { NgoView } from "@/components/dashboard/ngo-view"
+import { DashboardHome } from "@/components/dashboard/home-view";
 
 export default function DashboardPage() {
   return (
     <>
-      <VolunteerView />
-      {/* <NgoView /> */}
+      <DashboardHome />
     </>
   )
 }

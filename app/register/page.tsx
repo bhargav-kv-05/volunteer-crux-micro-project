@@ -124,22 +124,7 @@ export default function RegisterPage() {
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label>I want to join as a...</Label>
-                            <RadioGroup defaultValue="volunteer" onValueChange={handleRoleChange} className="flex gap-4">
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="volunteer" id="r-volunteer" />
-                                    <Label htmlFor="r-volunteer">Volunteer</Label>
-                                </div>
-                                {/* 
-                  // Uncomment if we want to allow NGO signups publically
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="ngo" id="r-ngo" />
-                    <Label htmlFor="r-ngo">NGO Organization</Label>
-                  </div> 
-                */}
-                            </RadioGroup>
-                        </div>
+                        {/* Role selection removed for public signup - defaults to Volunteer */}
 
                         <Button type="submit" className="w-full bg-green-600 hover:bg-green-700" disabled={loading}>
                             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}

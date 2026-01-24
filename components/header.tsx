@@ -26,7 +26,7 @@ export function Header() {
               Login
             </Button>
           </Link>
-          <Link href="/register">
+          <Link href="/join-ngo">
             <Button size="sm" className="text-sm font-medium">
               Join as NGO
             </Button>

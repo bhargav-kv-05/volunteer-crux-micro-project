@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectToDatabase } from "@/lib/mongodb";
 import Event from "@/models/Event";
 
@@ -45,5 +47,37 @@ export async function GET() {
         return NextResponse.json(events);
     } catch (error) {
         return NextResponse.json({ message: "Error fetching events" }, { status: 500 });
+    }
+}
+
+export async function POST(req: Request) {
+    try {
+        const session = await getServerSession(authOptions);
+
+        if (!session || !session.user) {
+            return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+        }
+
+        const body = await req.json();
+        const { title, date, location, skills, spots, image } = body;
+
+        await connectToDatabase();
+
+        const newEvent = await Event.create({
+            title,
+            date,
+            location,
+            skills,
+            spots: parseInt(spots),
+            image: image || "https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&q=80&w=600", // Default Volunteer Image
+            organizer: session.user.id,
+            filled: 0
+        });
+
+        return NextResponse.json({ message: "Event created successfully", event: newEvent }, { status: 201 });
+
+    } catch (error) {
+        console.error("Error creating event:", error);
+        return NextResponse.json({ message: "Error creating event" }, { status: 500 });
     }
 }

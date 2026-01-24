@@ -39,10 +39,21 @@ export function DashboardHeader() {
         </div>
       </div>
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5 text-gray-700" />
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5 text-gray-700" />
+              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-64">
+            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <div className="p-4 text-sm text-gray-500 text-center">
+              All caught up! No new notifications.
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-9 w-9 rounded-full">
@@ -67,9 +78,7 @@ export function DashboardHeader() {
                 Profile
               </DropdownMenuItem>
             </Link>
-            <DropdownMenuItem className="cursor-pointer">
-              Notifications
-            </DropdownMenuItem>
+
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-red-600 focus:text-red-600 cursor-pointer" onClick={() => signOut()}>
               Log out
