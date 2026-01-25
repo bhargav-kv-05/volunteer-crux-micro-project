@@ -80,7 +80,7 @@ export function DashboardHeader() {
             </Link>
 
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-600 focus:text-red-600 cursor-pointer" onClick={() => signOut()}>
+            <DropdownMenuItem className="text-red-600 focus:text-red-600 cursor-pointer" onClick={() => signOut({ callbackUrl: "/" })}>
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

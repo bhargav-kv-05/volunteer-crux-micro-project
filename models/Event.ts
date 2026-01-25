@@ -21,6 +21,12 @@ const EventSchema = new Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "User"
         }],
+
+        // Who actually completed the event? (Verified by NGO)
+        attendees: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        }],
     },
     { timestamps: true }
 );
