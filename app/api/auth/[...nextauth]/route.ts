@@ -34,16 +34,26 @@ export const authOptions: NextAuthOptions = {
                     name: user.name,
                     email: user.email,
                     role: user.role,
+                    points: user.points,
+                    avatar: user.avatar,
                 };
             },
         }),
     ],
     callbacks: {
-        async jwt({ token, user }) {
+        async jwt({ token, user, trigger, session }) {
+            // Initial sign in
             if (user) {
                 token.role = user.role;
                 token.id = user.id;
-                token.name = user.name; // Explicitly persisting name
+                token.name = user.name;
+                token.points = user.points;
+                token.avatar = user.avatar;
+            }
+            // Support updating session on the client
+            if (trigger === "update" && session) {
+                token.points = session.user.points;
+                token.avatar = session.user.avatar;
             }
             return token;
         },
@@ -51,7 +61,9 @@ export const authOptions: NextAuthOptions = {
             if (session?.user) {
                 session.user.role = token.role;
                 session.user.id = token.id as string;
-                session.user.name = token.name; // Explicitly passing name
+                session.user.name = token.name;
+                session.user.points = token.points;
+                session.user.avatar = token.avatar;
             }
             return session;
         },

@@ -39,6 +39,11 @@ export function DashboardHeader() {
         </div>
       </div>
       <div className="flex items-center gap-4">
+        {user?.points && user.points > 0 && (
+          <div className="hidden md:flex items-center text-sm font-medium text-yellow-600 bg-yellow-50 px-3 py-1 rounded-full border border-yellow-200 mr-2">
+            🏆 {user.points} pts
+          </div>
+        )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
@@ -57,8 +62,8 @@ export function DashboardHeader() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-              <Avatar className="h-9 w-9">
-                <AvatarImage src="/placeholder-user.jpg" alt={user?.name || "User"} />
+              <Avatar className="h-9 w-9 border">
+                <AvatarImage src={user?.avatar || user?.image || ""} alt={user?.name || "User"} />
                 <AvatarFallback>{getInitials(user?.name)}</AvatarFallback>
               </Avatar>
             </Button>

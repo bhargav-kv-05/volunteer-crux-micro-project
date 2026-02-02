@@ -34,14 +34,19 @@ export async function PUT(req: Request) {
         }
 
         const body = await req.json();
-        const { skills } = body;
+        const { skills, avatar } = body;
 
         await connectToDatabase();
 
-        // Update user skills
+        // Build update object dynamically
+        const updateData: any = {};
+        if (skills) updateData.skills = skills;
+        if (avatar !== undefined) updateData.avatar = avatar;
+
+        // Update user
         const updatedUser = await User.findOneAndUpdate(
             { email: session.user.email },
-            { skills },
+            updateData,
             { new: true }
         );
 

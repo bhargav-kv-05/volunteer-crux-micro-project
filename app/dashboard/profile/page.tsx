@@ -5,20 +5,16 @@ import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, Save } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Loader2, Save, RefreshCw, Trophy } from "lucide-react";
 
 const AVAILABLE_SKILLS = [
-    "Environmental",
-    "Teaching",
-    "Community Service",
-    "Medical",
-    "Logistics",
-    "Communication",
-    "Tech",
-    "Teamwork",
-    "Leadership",
-    "Event Planning"
+    "Environmental", "Teaching", "Community Service", "Medical",
+    "Logistics", "Communication", "Tech", "Teamwork",
+    "Leadership", "Event Planning"
 ];
+
+const AVATAR_SEEDS = ["Felix", "Aneka", "Zack", "Molly", "Garfield", "Simba", "Salem", "Nala"];
 
 export default function ProfilePage() {
     const { data: session } = useSession();
@@ -26,9 +22,11 @@ export default function ProfilePage() {
     const [saving, setSaving] = useState(false);
     const [user, setUser] = useState<any>(null);
     const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+    const [selectedAvatar, setSelectedAvatar] = useState("");
 
     // Add initialSkills state to track dirty state
     const [initialSkills, setInitialSkills] = useState<string[]>([]);
+    const [initialAvatar, setInitialAvatar] = useState("");
 
     useEffect(() => {
         fetchProfile();
@@ -42,7 +40,11 @@ export default function ProfilePage() {
                 setUser(data);
                 if (data.skills) {
                     setSelectedSkills(data.skills);
-                    setInitialSkills(data.skills); // Set initial source of truth
+                    setInitialSkills(data.skills);
+                }
+                if (data.avatar) {
+                    setSelectedAvatar(data.avatar);
+                    setInitialAvatar(data.avatar);
                 }
             }
         } catch (error) {
@@ -58,14 +60,17 @@ export default function ProfilePage() {
             const res = await fetch("/api/user/profile", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ skills: selectedSkills }),
+                body: JSON.stringify({
+                    skills: selectedSkills,
+                    avatar: selectedAvatar
+                }),
             });
 
             if (res.ok) {
-                // Update initial state to match the new saved state
                 setInitialSkills(selectedSkills);
-                alert("Skills updated successfully!");
-                // No need to fetchProfile again since we updated local state
+                setInitialAvatar(selectedAvatar);
+                alert("Profile updated successfully!");
+                window.location.reload(); // Refresh to update header avatar if needed
             } else {
                 alert("Failed to update profile.");
             }
@@ -85,8 +90,10 @@ export default function ProfilePage() {
         );
     };
 
-    // Check if skills have changed
-    const isDirty = JSON.stringify(selectedSkills.sort()) !== JSON.stringify(initialSkills.sort());
+    const isDirty = (
+        JSON.stringify(selectedSkills.sort()) !== JSON.stringify(initialSkills.sort()) ||
+        selectedAvatar !== initialAvatar
+    );
 
     if (loading) {
         return (
@@ -101,34 +108,61 @@ export default function ProfilePage() {
             <h1 className="mb-8 text-3xl font-bold">My Profile</h1>
 
             <div className="grid gap-6">
+
+                {/* Identity Card */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Personal Information</CardTitle>
-                        <CardDescription>Your account details.</CardDescription>
+                        <CardTitle>Public Profile</CardTitle>
+                        <CardDescription>How you appear to others on the platform.</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="text-sm font-medium text-muted-foreground">Name</label>
-                                <p className="text-lg font-medium">{user?.name}</p>
+                    <CardContent className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
+                        <div className="flex flex-col items-center gap-3">
+                            <Avatar className="h-24 w-24 border-2 border-primary/20">
+                                <AvatarImage src={selectedAvatar} />
+                                <AvatarFallback className="text-2xl">{user?.name?.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div className="grid grid-cols-4 gap-2">
+                                {AVATAR_SEEDS.map(seed => {
+                                    const url = `https://api.dicebear.com/7.x/notionists/svg?seed=${seed}`;
+                                    return (
+                                        <button
+                                            key={seed}
+                                            onClick={() => setSelectedAvatar(url)}
+                                            className={`rounded-full p-0.5 border-2 transition-all hover:scale-110 ${selectedAvatar === url ? "border-primary" : "border-transparent"}`}
+                                        >
+                                            <Avatar className="h-8 w-8 cursor-pointer">
+                                                <AvatarImage src={url} />
+                                            </Avatar>
+                                        </button>
+                                    )
+                                })}
                             </div>
+                        </div>
+
+                        <div className="space-y-4 flex-1 w-full text-center sm:text-left">
                             <div>
-                                <label className="text-sm font-medium text-muted-foreground">Email</label>
-                                <p className="text-lg font-medium">{user?.email}</p>
+                                <h3 className="text-xl font-bold">{user?.name}</h3>
+                                <p className="text-muted-foreground">{user?.email}</p>
+                                <Badge variant="secondary" className="mt-2 capitalize">{user?.role}</Badge>
                             </div>
-                            <div>
-                                <label className="text-sm font-medium text-muted-foreground">Role</label>
-                                <Badge variant="outline" className="capitalize mt-1">{user?.role}</Badge>
+
+                            <div className="flex items-center justify-center sm:justify-start gap-4 p-4 bg-yellow-50 rounded-lg border border-yellow-100">
+                                <Trophy className="h-8 w-8 text-yellow-500" />
+                                <div>
+                                    <div className="text-2xl font-bold text-gray-900">{user?.points || 0}</div>
+                                    <div className="text-xs uppercase font-semibold text-yellow-700">Impact Points</div>
+                                </div>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
+                {/* Skills Card */}
                 <Card>
                     <CardHeader>
                         <CardTitle>Skills & Expertise</CardTitle>
                         <CardDescription>
-                            Select the skills you possess. We use this to match you with the perfect volunteering opportunities.
+                            Select the skills you possess.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -149,7 +183,6 @@ export default function ProfilePage() {
                             })}
                         </div>
 
-                        {/* Only show save button if changes were made */}
                         {isDirty && (
                             <div className="flex justify-end animate-in fade-in slide-in-from-bottom-2">
                                 <Button onClick={handleSave} disabled={saving}>

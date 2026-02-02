@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectToDatabase } from "@/lib/mongodb";
 import Event from "@/models/Event";
+import User from "@/models/User";
 
 export async function POST(req: Request) {
     try {
@@ -34,11 +35,22 @@ export async function POST(req: Request) {
 
         // 3. Update Logic
         const attendeesSet = new Set(event.attendees.map((id: any) => id.toString()));
+        const isAlreadyAttended = attendeesSet.has(volunteerId);
 
-        if (attended) {
+        if (attended && !isAlreadyAttended) {
+            // Mark present: Add to list + Award Points
             attendeesSet.add(volunteerId);
-        } else {
+            await User.findByIdAndUpdate(volunteerId, { $inc: { points: 10 } });
+        } else if (!attended && isAlreadyAttended) {
+            // Mark absent: Remove from list - Deduct Points
             attendeesSet.delete(volunteerId);
+
+            // Safe Deduct: Only deduct if user has >= 10 points to avoid negative debt spirals
+            // This also fixes the "Desync" issue where a user might be verified but have 0 points.
+            await User.updateOne(
+                { _id: volunteerId, points: { $gte: 10 } },
+                { $inc: { points: -10 } }
+            );
         }
 
         event.attendees = Array.from(attendeesSet);

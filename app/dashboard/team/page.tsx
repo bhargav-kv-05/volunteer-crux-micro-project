@@ -20,6 +20,7 @@ async function getMyTeamEvents() {
     // Find events where the volunteers array contains the current user's ID
     const events = await Event.find({ volunteers: session.user.id })
         .populate("volunteers", "name email") // Get details of teammates
+        .populate("organizer", "email") // Get organizer email
         .sort({ date: 1 });
 
     return events;
@@ -96,8 +97,18 @@ export default async function TeamPage() {
                                     </div>
                                 </div>
                             </CardContent>
-                            <CardFooter className="p-4 bg-gray-50 border-t text-xs text-muted-foreground">
-                                <p>Contact your team lead for coordination.</p>
+                            <CardFooter className="p-4 bg-gray-50 border-t flex justify-between items-center text-xs text-muted-foreground">
+                                <span>Have questions?</span>
+                                {event.organizer?.email ? (
+                                    <a
+                                        href={`mailto:${event.organizer.email}?subject=Question regarding ${event.title}`}
+                                        className="text-primary hover:underline font-medium flex items-center gap-1"
+                                    >
+                                        Email Organizer ✉️
+                                    </a>
+                                ) : (
+                                    <span className="text-gray-400">Contact currently unavailable</span>
+                                )}
                             </CardFooter>
                         </Card>
                     ))}
