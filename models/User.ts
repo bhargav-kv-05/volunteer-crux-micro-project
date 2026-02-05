@@ -13,7 +13,6 @@ const UserSchema = new Schema(
         },
         password: {
             type: String,
-            required: [true, "Please provide a password"],
             select: false, // Don't return password by default when fetching user
         },
         role: {
