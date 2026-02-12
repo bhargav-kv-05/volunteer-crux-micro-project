@@ -23,18 +23,40 @@ app.prepare().then(() => {
         }
     });
 
-    // --- Socket.IO Integration (Single Port) ---
-    const io = new Server(httpServer, {
-        path: "/socket.io", // Default path, but good to be explicit
-        addTrailingSlash: false,
-        cors: {
-            origin: "*",
-            methods: ["GET", "POST"],
-        },
-    });
+    // --- Configurable Socket.IO Setup ---
+    let ioServer;
 
-    io.on("connection", (socket) => {
-        console.log("Client connected:", socket.id);
+    // In Development: Use a separate port (3001) to avoid Next.js conflicts (Restores previous working state)
+    // In Production: Must use the SAME port (Render only gives one port)
+    if (dev) {
+        const socketPort = 3001;
+        const socketServer = createServer();
+        ioServer = new Server(socketServer, {
+            path: "/socket.io",
+            addTrailingSlash: false,
+            cors: {
+                origin: "*", // Safe for local dev on separate port
+                methods: ["GET", "POST"]
+            }
+        });
+        socketServer.listen(socketPort, () => {
+            console.log(`> 🛠️  Local Socket.IO Server running on port ${socketPort}`);
+        });
+    } else {
+        // Production (Single Port)
+        ioServer = new Server(httpServer, {
+            path: "/socket.io",
+            addTrailingSlash: false,
+            cors: {
+                origin: process.env.NEXTAUTH_URL || "", // Strict in production
+                methods: ["GET", "POST"],
+                credentials: true
+            }
+        });
+    }
+
+    ioServer.on("connection", (socket) => {
+        console.log("✅ Client connected to Socket.IO:", socket.id);
 
         socket.on("join_room", (eventId) => {
             socket.join(eventId);
@@ -42,7 +64,7 @@ app.prepare().then(() => {
         });
 
         socket.on("send_message", (data) => {
-            io.to(data.eventId).emit("receive_message", data);
+            ioServer.to(data.eventId).emit("receive_message", data);
         });
 
         socket.on("disconnect", () => {
