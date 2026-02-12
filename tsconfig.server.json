@@ -4,6 +4,7 @@
         "module": "commonjs",
         "moduleResolution": "node",
         "outDir": "dist",
+        "noEmit": false,
         "lib": [
             "es2019"
         ],

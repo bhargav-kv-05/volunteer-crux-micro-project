@@ -1,0 +1,80 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const http_1 = require("http");
+const url_1 = require("url");
+const next_1 = __importDefault(require("next"));
+const socket_io_1 = require("socket.io");
+const dev = process.env.NODE_ENV !== "production";
+const hostname = "0.0.0.0"; // Bind to all interfaces to avoid localhost/127.0.0.1 mismatches
+const port = parseInt(process.env.PORT || "3000", 10);
+// when using middleware `hostname` and `port` must be provided below
+const app = (0, next_1.default)({ dev, hostname, port });
+const handle = app.getRequestHandler();
+app.prepare().then(() => {
+    const httpServer = (0, http_1.createServer)(async (req, res) => {
+        try {
+            const parsedUrl = (0, url_1.parse)(req.url, true);
+            await handle(req, res, parsedUrl);
+        }
+        catch (err) {
+            console.error("Error occurred handling", req.url, err);
+            res.statusCode = 500;
+            res.end("internal server error");
+        }
+    });
+    // --- Configurable Socket.IO Setup ---
+    let ioServer;
+    // In Development: Use a separate port (3001) to avoid Next.js conflicts (Restores previous working state)
+    // In Production: Must use the SAME port (Render only gives one port)
+    if (dev) {
+        const socketPort = 3001;
+        const socketServer = (0, http_1.createServer)();
+        ioServer = new socket_io_1.Server(socketServer, {
+            path: "/socket.io",
+            addTrailingSlash: false,
+            cors: {
+                origin: "*", // Safe for local dev on separate port
+                methods: ["GET", "POST"]
+            }
+        });
+        socketServer.listen(socketPort, () => {
+            console.log(`> 🛠️  Local Socket.IO Server running on port ${socketPort}`);
+        });
+    }
+    else {
+        // Production (Single Port)
+        ioServer = new socket_io_1.Server(httpServer, {
+            path: "/socket.io",
+            addTrailingSlash: false,
+            cors: {
+                origin: process.env.NEXTAUTH_URL || "", // Strict in production
+                methods: ["GET", "POST"],
+                credentials: true
+            }
+        });
+    }
+    ioServer.on("connection", (socket) => {
+        console.log("✅ Client connected to Socket.IO:", socket.id);
+        socket.on("join_room", (eventId) => {
+            socket.join(eventId);
+            console.log(`User ${socket.id} joined room: ${eventId}`);
+        });
+        socket.on("send_message", (data) => {
+            ioServer.to(data.eventId).emit("receive_message", data);
+        });
+        socket.on("disconnect", () => {
+            console.log("Client disconnected:", socket.id);
+        });
+    });
+    httpServer
+        .once("error", (err) => {
+        console.error(err);
+        process.exit(1);
+    })
+        .listen(port, () => {
+        console.log(`> App Ready on http://${hostname}:${port}`);
+    });
+});
