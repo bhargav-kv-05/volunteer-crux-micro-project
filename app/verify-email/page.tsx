@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 
-export default function VerifyEmailPage() {
+import { Suspense } from "react";
+
+function VerifyEmailContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const token = searchParams.get("token");
@@ -51,32 +53,40 @@ export default function VerifyEmailPage() {
     }, [token, router]);
 
     return (
+        <Card className="w-full max-w-md text-center">
+            <CardHeader>
+                <div className="flex justify-center mb-4">
+                    {status === "loading" && <Loader2 className="h-12 w-12 animate-spin text-blue-500" />}
+                    {status === "success" && <CheckCircle2 className="h-12 w-12 text-green-500" />}
+                    {status === "error" && <XCircle className="h-12 w-12 text-red-500" />}
+                </div>
+                <CardTitle className="text-2xl font-bold">
+                    {status === "loading" ? "Verifying..." : status === "success" ? "Verified!" : "Verification Failed"}
+                </CardTitle>
+                <CardDescription>{message}</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {status === "success" && (
+                    <Link href="/login">
+                        <Button className="w-full bg-green-600 hover:bg-green-700">Go to Login</Button>
+                    </Link>
+                )}
+                {status === "error" && (
+                    <Link href="/register">
+                        <Button variant="outline" className="w-full">Back to Register</Button>
+                    </Link>
+                )}
+            </CardContent>
+        </Card>
+    );
+}
+
+export default function VerifyEmailPage() {
+    return (
         <div className="flex h-screen items-center justify-center bg-gray-50 p-4">
-            <Card className="w-full max-w-md text-center">
-                <CardHeader>
-                    <div className="flex justify-center mb-4">
-                        {status === "loading" && <Loader2 className="h-12 w-12 animate-spin text-blue-500" />}
-                        {status === "success" && <CheckCircle2 className="h-12 w-12 text-green-500" />}
-                        {status === "error" && <XCircle className="h-12 w-12 text-red-500" />}
-                    </div>
-                    <CardTitle className="text-2xl font-bold">
-                        {status === "loading" ? "Verifying..." : status === "success" ? "Verified!" : "Verification Failed"}
-                    </CardTitle>
-                    <CardDescription>{message}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    {status === "success" && (
-                        <Link href="/login">
-                            <Button className="w-full bg-green-600 hover:bg-green-700">Go to Login</Button>
-                        </Link>
-                    )}
-                    {status === "error" && (
-                        <Link href="/register">
-                            <Button variant="outline" className="w-full">Back to Register</Button>
-                        </Link>
-                    )}
-                </CardContent>
-            </Card>
+            <Suspense fallback={<Loader2 className="h-12 w-12 animate-spin text-blue-500" />}>
+                <VerifyEmailContent />
+            </Suspense>
         </div>
     );
 }
