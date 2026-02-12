@@ -22,7 +22,7 @@ interface Event {
 
 export function DashboardHome() {
     const { data: session } = useSession();
-    const [stats, setStats] = useState({ joined: 0, totalHours: 0 }); // Mocking hours for now
+    const [stats, setStats] = useState({ joined: 0, totalHours: 0, points: 0 });
     const [recommendations, setRecommendations] = useState<Event[]>([]);
     const [loading, setLoading] = useState(true);
     const [userName, setUserName] = useState("Volunteer");
@@ -61,7 +61,11 @@ export function DashboardHome() {
                     return matchB - matchA; // Highest match first
                 });
 
-                setStats({ joined: myEvents.length, totalHours: myEvents.length * 5 }); // Assume 5 hrs/event
+                setStats({
+                    joined: myEvents.length,
+                    totalHours: myEvents.length * 5,
+                    points: profileData.points || 0
+                });
                 setRecommendations(availableEvents.slice(0, 3)); // Top 3
 
             } catch (error) {
@@ -115,7 +119,7 @@ export function DashboardHome() {
                         <Star className="h-4 w-4 text-yellow-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold hidden-value">{stats.joined * 10 + 50}</div>
+                        <div className="text-2xl font-bold">{stats.points}</div>
                         <p className="text-xs text-muted-foreground">Points earned contributing</p>
                     </CardContent>
                 </Card>

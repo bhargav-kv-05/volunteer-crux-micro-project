@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, startTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +18,8 @@ const AVAILABLE_SKILLS = [
 const AVATAR_SEEDS = ["Felix", "Aneka", "Zack", "Molly", "Garfield", "Simba", "Salem", "Nala"];
 
 export default function ProfilePage() {
-    const { data: session } = useSession();
+    const { data: session, update } = useSession();
+    const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [user, setUser] = useState<any>(null);
@@ -27,6 +29,7 @@ export default function ProfilePage() {
     // Add initialSkills state to track dirty state
     const [initialSkills, setInitialSkills] = useState<string[]>([]);
     const [initialAvatar, setInitialAvatar] = useState("");
+    const [initialName, setInitialName] = useState("");
 
     useEffect(() => {
         fetchProfile();
@@ -38,6 +41,7 @@ export default function ProfilePage() {
             if (res.ok) {
                 const data = await res.json();
                 setUser(data);
+                setInitialName(data.name); // Track initial name
                 if (data.skills) {
                     setSelectedSkills(data.skills);
                     setInitialSkills(data.skills);
@@ -61,16 +65,30 @@ export default function ProfilePage() {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    name: user.name, // Send updated name
                     skills: selectedSkills,
-                    avatar: selectedAvatar
+                    avatar: selectedAvatar,
                 }),
             });
 
             if (res.ok) {
                 setInitialSkills(selectedSkills);
                 setInitialAvatar(selectedAvatar);
+                setInitialName(user.name);
+
+                // Update NextAuth session client-side
+                await update({
+                    ...session,
+                    user: {
+                        ...session?.user,
+                        name: user.name
+                    }
+                });
+
                 alert("Profile updated successfully!");
-                window.location.reload(); // Refresh to update header avatar if needed
+                startTransition(() => {
+                    router.refresh();
+                });
             } else {
                 alert("Failed to update profile.");
             }
@@ -92,7 +110,8 @@ export default function ProfilePage() {
 
     const isDirty = (
         JSON.stringify(selectedSkills.sort()) !== JSON.stringify(initialSkills.sort()) ||
-        selectedAvatar !== initialAvatar
+        selectedAvatar !== initialAvatar ||
+        user?.name !== initialName
     );
 
     if (loading) {
@@ -152,6 +171,54 @@ export default function ProfilePage() {
                                     <div className="text-2xl font-bold text-gray-900">{user?.points || 0}</div>
                                     <div className="text-xs uppercase font-semibold text-yellow-700">Impact Points</div>
                                 </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Account Settings Card */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Account Settings</CardTitle>
+                        <CardDescription>Update your personal information and security.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Full Name</label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={user?.name || ""}
+                                    onChange={(e) => setUser({ ...user, name: e.target.value })}
+                                    className="flex-1 px-3 py-2 border rounded-md text-sm"
+                                    placeholder="Your Name"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2 pt-4 border-t">
+                            <label className="text-sm font-medium">Security</label>
+                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
+                                <div>
+                                    <h4 className="font-medium text-sm">Password</h4>
+                                    <p className="text-xs text-muted-foreground">Securely reset your password via email.</p>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={async () => {
+                                        if (!confirm("Send a password reset link to your email?")) return;
+                                        const res = await fetch("/api/auth/forgot-password", {
+                                            method: "POST",
+                                            headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify({ email: user.email }),
+                                        });
+                                        if (res.ok) alert("Reset link sent! Check your email.");
+                                        else alert("Failed to send link.");
+                                    }}
+                                >
+                                    Send Reset Link
+                                </Button>
                             </div>
                         </div>
                     </CardContent>

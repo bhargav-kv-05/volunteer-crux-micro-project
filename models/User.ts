@@ -20,13 +20,21 @@ const UserSchema = new Schema(
             enum: ["volunteer", "ngo", "admin"], // Only these 3 roles are allowed
             default: "volunteer",
         },
-        isVerified: {
-            type: Boolean,
-            default: false, // For that "Offline Validation" feature you have
-        },
         skills: [{ type: String }], // Array of skills like ["Environmental", "Teamwork"]
+
+        // Gamification
         points: { type: Number, default: 0 },
         avatar: { type: String, default: "" },
+
+        // Authentication & Security
+        isVerified: {
+            type: Boolean,
+            default: false,
+        },
+        verifyToken: String,
+        verifyTokenExpiry: Date,
+        resetPasswordToken: String,
+        resetPasswordExpires: Date,
     },
     { timestamps: true } // Automatically adds 'createdAt' and 'updatedAt'
 );

@@ -28,7 +28,7 @@ export const authOptions: NextAuthOptions = {
 
                 const user = await User.findOne({ email: credentials?.email }).select("+password");
 
-                if (!user) throw new Error("Invalid email or password");
+                if (!user) throw new Error("No user found with this email");
 
                 // If user has no password (e.g. Google user attempting credentials log in)
                 if (!user.password) throw new Error("Please sign in with Google");
@@ -38,7 +38,11 @@ export const authOptions: NextAuthOptions = {
                     user.password
                 );
 
-                if (!isPasswordMatched) throw new Error("Invalid email or password");
+                if (!isPasswordMatched) throw new Error("Invalid password");
+
+                if (!user.isVerified) {
+                    throw new Error("Please verify your email before logging in.");
+                }
 
                 return {
                     id: user._id.toString(),
@@ -66,7 +70,7 @@ export const authOptions: NextAuthOptions = {
                             role: "volunteer", // Default role
                             points: 0,
                             avatar: user.image || "", // Use Google profile picture
-                            // password is optional now
+                            isVerified: true, // Google users are verified by default
                         });
                     }
                     return true;
@@ -80,16 +84,28 @@ export const authOptions: NextAuthOptions = {
         async jwt({ token, user, trigger, session }) {
             // Initial sign in
             if (user) {
-                token.role = user.role;
-                token.id = user.id;
-                token.name = user.name;
-                token.points = user.points;
-                token.avatar = user.avatar;
+                // If user object is from Google, it might have Google ID.
+                // We must lookup the MongoDB ID to ensure consistency.
+                await connectToDatabase();
+                const dbUser = await User.findOne({ email: user.email });
+
+                if (dbUser) {
+                    token.id = dbUser._id.toString();
+                    token.role = dbUser.role;
+                    token.points = dbUser.points;
+                    token.avatar = dbUser.avatar;
+                    token.name = dbUser.name;
+                } else {
+                    // Fallback (Should not happen given signIn callback creates user)
+                    token.id = user.id;
+                    token.role = user.role;
+                }
             }
             // Support updating session on the client
             if (trigger === "update" && session) {
                 token.points = session.user.points;
                 token.avatar = session.user.avatar;
+                token.name = session.user.name;
             }
             return token;
         },

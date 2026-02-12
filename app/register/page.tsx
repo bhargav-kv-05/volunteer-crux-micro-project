@@ -45,7 +45,7 @@ export default function RegisterPage() {
             const data = await res.json();
 
             if (res.ok) {
-                alert("Registration successful! Please login.");
+                alert(data.message || "Registration successful! Please check your email to verify your account.");
                 router.push("/login");
             } else {
                 alert(data.message || "Registration failed");

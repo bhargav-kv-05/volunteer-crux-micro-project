@@ -2,8 +2,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectToDatabase } from "@/lib/mongodb";
 import Event from "@/models/Event";
+import Link from "next/link";
 import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
-import { Calendar, MapPin, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, MapPin, Users, MessageCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import User from "@/models/User"; // Ensure User model is registered
 
@@ -97,18 +99,27 @@ export default async function TeamPage() {
                                     </div>
                                 </div>
                             </CardContent>
-                            <CardFooter className="p-4 bg-gray-50 border-t flex justify-between items-center text-xs text-muted-foreground">
-                                <span>Have questions?</span>
-                                {event.organizer?.email ? (
-                                    <a
-                                        href={`mailto:${event.organizer.email}?subject=Question regarding ${event.title}`}
-                                        className="text-primary hover:underline font-medium flex items-center gap-1"
-                                    >
-                                        Email Organizer ✉️
-                                    </a>
-                                ) : (
-                                    <span className="text-gray-400">Contact currently unavailable</span>
-                                )}
+                            <CardFooter className="p-4 bg-gray-50 border-t flex flex-col gap-3">
+                                <Link href={`/dashboard/events/${event._id}`} className="w-full">
+                                    <Button className="w-full" variant="outline">
+                                        <MessageCircle className="mr-2 h-4 w-4 text-green-600" /> Open Team Chat
+                                    </Button>
+                                </Link>
+                                <div className="flex justify-between items-center w-full text-xs text-muted-foreground">
+                                    <span>Have questions?</span>
+                                    {event.organizer?.email ? (
+                                        <a
+                                            href={`mailto:${event.organizer.email}?subject=Question regarding ${event.title}`}
+                                            className="text-primary hover:underline font-medium flex items-center gap-1"
+                                        >
+                                            Email Organizer ✉️
+                                        </a>
+                                    ) : (
+                                        <span className="text-gray-400">
+                                            {event.organizer?.name ? `Contact ${event.organizer.name}` : "Contact Organizer"}
+                                        </span>
+                                    )}
+                                </div>
                             </CardFooter>
                         </Card>
                     ))}

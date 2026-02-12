@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, MapPin, Users, Loader2, ArrowLeft, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import EventChat from "@/components/dashboard/event-chat";
 
 interface Event {
     _id: string;
@@ -20,6 +21,7 @@ interface Event {
     spots: number;
     filled: number;
     volunteers: string[];
+    organizer: string;
     description?: string; // Future proofing
 }
 
@@ -153,6 +155,18 @@ export default function EventDetailsPage() {
                             )}
                         </div>
                     </div>
+
+                    {/* Chat Section - Only visible if joined */}
+                    {isJoined && (
+                        <div className="mt-8">
+                            <h3 className="text-xl font-bold mb-4">Team Communication</h3>
+                            <EventChat
+                                eventId={event._id}
+                                eventTitle={event.title}
+                                organizerId={event.organizer}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {/* Sidebar Actions */}
