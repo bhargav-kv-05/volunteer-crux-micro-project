@@ -42,3 +42,45 @@ export async function sendVerificationEmail(to: string, token: string) {
         return false;
     }
 }
+
+export async function sendPasswordResetEmail(to: string, token: string) {
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS,
+        },
+    });
+
+    const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
+
+    const mailOptions = {
+        from: `"Volunteer Crux Support" <${process.env.EMAIL_USER}>`,
+        to,
+        subject: "Reset Your Password - Volunteer Crux",
+        html: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                <h2>Password Reset Request</h2>
+                <p>Hello,</p>
+                <p>We received a request to reset your password. If you didn't make this request, you can safely ignore this email.</p>
+                <p style="text-align: center; margin: 30px 0;">
+                    <a href="${resetUrl}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Reset Password</a>
+                </p>
+                <p>Or copy and paste this link:</p>
+                <p><a href="${resetUrl}">${resetUrl}</a></p>
+                <p>This link expires in 1 hour.</p>
+                <br>
+                <p>Best regards,<br>The Volunteer Crux Team</p>
+            </div>
+        `,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`✅ Password reset email sent to ${to}`);
+        return true;
+    } catch (error) {
+        console.error("❌ Error sending password reset email:", error);
+        return false;
+    }
+}

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/models/User";
 import crypto from "crypto";
+import { sendPasswordResetEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
     try {
@@ -15,8 +16,7 @@ export async function POST(req: Request) {
         const user = await User.findOne({ email });
 
         if (!user) {
-            // Rate limiting/Security: Don't reveal if user exists or not, but for UX maybe just say "If an account exists..."
-            // For now, let's just return success message to prevent enumeration
+            // Rate limiting/Security: Don't reveal if user exists or not
             return NextResponse.json({ message: "If an account exists for that email, we have sent password reset instructions." }, { status: 200 });
         }
 
@@ -29,18 +29,15 @@ export async function POST(req: Request) {
         user.resetPasswordExpires = passwordResetExpires;
         await user.save();
 
-        // Send email (Simulated for MVP)
-        // In production, use nodemailer or similar service
-        const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${resetToken}`;
+        // Send real email
+        const emailSent = await sendPasswordResetEmail(user.email, resetToken);
 
-        console.log(`
-        ============================================
-        PASSWORD RESET LINK (DEV MODE):
-        ${resetUrl}
-        ============================================
-        `);
+        if (!emailSent) {
+            console.error("Failed to send password reset email.");
+            // We still return 200 to user to avoid leaking system state, but log the error
+        }
 
-        return NextResponse.json({ message: "Password reset link sent to your email." }, { status: 200 });
+        return NextResponse.json({ message: "If an account exists for that email, we have sent password reset instructions." }, { status: 200 });
 
     } catch (error) {
         console.error("Forgot Password Error:", error);

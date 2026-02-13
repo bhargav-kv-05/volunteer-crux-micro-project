@@ -8,6 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, Save, RefreshCw, Trophy } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const AVAILABLE_SKILLS = [
     "Environmental", "Teaching", "Community Service", "Medical",
@@ -30,6 +33,15 @@ export default function ProfilePage() {
     const [initialSkills, setInitialSkills] = useState<string[]>([]);
     const [initialAvatar, setInitialAvatar] = useState("");
     const [initialName, setInitialName] = useState("");
+
+    // Change Password State
+    const [isPasswordOpen, setIsPasswordOpen] = useState(false);
+    const [passwordForm, setPasswordForm] = useState({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+    });
+    const [passwordLoading, setPasswordLoading] = useState(false);
 
     useEffect(() => {
         fetchProfile();
@@ -97,6 +109,48 @@ export default function ProfilePage() {
             alert("Something went wrong.");
         } finally {
             setSaving(false);
+        }
+    }
+
+    async function handleChangePassword() {
+        if (!passwordForm.currentPassword || !passwordForm.newPassword) {
+            alert("Please fill in all fields");
+            return;
+        }
+        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+            alert("New passwords do not match");
+            return;
+        }
+        if (passwordForm.newPassword.length < 6) {
+            alert("Password must be at least 6 characters");
+            return;
+        }
+
+        setPasswordLoading(true);
+        try {
+            const res = await fetch("/api/user/change-password", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    currentPassword: passwordForm.currentPassword,
+                    newPassword: passwordForm.newPassword
+                }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                alert("Password updated successfully!");
+                setIsPasswordOpen(false);
+                setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+            } else {
+                alert(data.message || "Failed to update password");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Something went wrong");
+        } finally {
+            setPasswordLoading(false);
         }
     }
 
@@ -201,24 +255,54 @@ export default function ProfilePage() {
                             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
                                 <div>
                                     <h4 className="font-medium text-sm">Password</h4>
-                                    <p className="text-xs text-muted-foreground">Securely reset your password via email.</p>
+                                    <p className="text-xs text-muted-foreground">Securely update your password.</p>
                                 </div>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={async () => {
-                                        if (!confirm("Send a password reset link to your email?")) return;
-                                        const res = await fetch("/api/auth/forgot-password", {
-                                            method: "POST",
-                                            headers: { "Content-Type": "application/json" },
-                                            body: JSON.stringify({ email: user.email }),
-                                        });
-                                        if (res.ok) alert("Reset link sent! Check your email.");
-                                        else alert("Failed to send link.");
-                                    }}
-                                >
-                                    Send Reset Link
-                                </Button>
+                                <Dialog open={isPasswordOpen} onOpenChange={setIsPasswordOpen}>
+                                    <DialogTrigger asChild>
+                                        <Button variant="outline" size="sm">Change Password</Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                        <DialogHeader>
+                                            <DialogTitle>Change Password</DialogTitle>
+                                            <DialogDescription>
+                                                Enter your current password and a new password below.
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <div className="space-y-4 py-4">
+                                            <div className="space-y-2">
+                                                <Label>Current Password</Label>
+                                                <Input
+                                                    type="password"
+                                                    value={passwordForm.currentPassword}
+                                                    onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>New Password</Label>
+                                                <Input
+                                                    type="password"
+                                                    value={passwordForm.newPassword}
+                                                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Confirm New Password</Label>
+                                                <Input
+                                                    type="password"
+                                                    value={passwordForm.confirmPassword}
+                                                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                                                />
+                                            </div>
+                                        </div>
+                                        <DialogFooter>
+                                            <Button variant="outline" onClick={() => setIsPasswordOpen(false)}>Cancel</Button>
+                                            <Button onClick={handleChangePassword} disabled={passwordLoading}>
+                                                {passwordLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                Update Password
+                                            </Button>
+                                        </DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
                             </div>
                         </div>
                     </CardContent>
