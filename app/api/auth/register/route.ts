@@ -49,12 +49,12 @@ export async function POST(req: Request) {
 
         // 7. Send Real Verification Email
         console.log(`Attempting to send verification email to: ${email}`);
-        const emailSent = await sendVerificationEmail(email, verifyToken);
-        console.log(`Email sending result: ${emailSent}`);
+        const result = await sendVerificationEmail(email, verifyToken);
+        console.log(`Email sending result: ${JSON.stringify(result)}`);
 
-        if (!emailSent) {
+        if (!result.success) {
             return NextResponse.json(
-                { message: "Registration successful, but failed to send verification email." },
+                { message: `Registration successful, but failed to send verification email. Error: ${result.error}` },
                 { status: 201 } // Still created user, just email failed
             );
         }

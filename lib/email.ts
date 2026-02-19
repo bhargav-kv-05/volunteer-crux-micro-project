@@ -1,7 +1,7 @@
 
 import nodemailer from "nodemailer";
 
-export async function sendVerificationEmail(to: string, token: string) {
+export async function sendVerificationEmail(to: string, token: string): Promise<{ success: boolean; error?: string }> {
     const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 587,
@@ -19,34 +19,29 @@ export async function sendVerificationEmail(to: string, token: string) {
 
     const verificationUrl = `${process.env.NEXTAUTH_URL}/verify-email?token=${token}`;
 
-    const mailOptions = {
-        from: `"Volunteer Crux Support" <${process.env.EMAIL_USER}>`,
-        to,
-        subject: "Verify Your Email - Volunteer Crux",
-        html: `
-            <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-                <h2>Welcome to Volunteer Crux!</h2>
-                <p>Hello,</p>
-                <p>Thank you for registering. Please verify your email address to activate your account.</p>
-                <p style="text-align: center; margin: 30px 0;">
-                    <a href="${verificationUrl}" style="background-color: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Verify Email</a>
-                </p>
-                <p>If the button doesn't work, copy and paste this link:</p>
-                <p><a href="${verificationUrl}">${verificationUrl}</a></p>
-                <p>This link expires in 24 hours.</p>
-                <br>
-                <p>Best regards,<br>The Volunteer Crux Team</p>
-            </div>
-        `,
-    };
-
     try {
-        await transporter.sendMail(mailOptions);
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to,
+            subject: "Verify Your Email - Volunteer Crux",
+            html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #4CAF50;">Welcome to Volunteer Crux!</h2>
+          <p>Hello,</p>
+          <p>Thank you for registering. Please verify your email address to get started.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${verificationUrl}" style="background-color: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Verify Email</a>
+          </div>
+          <p>Or click this link: <a href="${verificationUrl}">${verificationUrl}</a></p>
+          <p>This link will expire in 24 hours.</p>
+        </div>
+      `,
+        });
         console.log(`✅ Email sent for to ${to}`);
-        return true;
-    } catch (error) {
+        return { success: true };
+    } catch (error: any) {
         console.error("❌ Error sending email:", error);
-        return false;
+        return { success: false, error: error.message || "Unknown error" };
     }
 }
 
