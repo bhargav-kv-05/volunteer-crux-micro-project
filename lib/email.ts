@@ -6,10 +6,15 @@ export async function sendVerificationEmail(to: string, token: string) {
         host: "smtp.gmail.com",
         port: 465,
         secure: true, // Use SSL
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true, // Use SSL
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS?.replace(/\s+/g, ""), // Remove spaces from App Password
         },
+        connectionTimeout: 10000, // Fail after 10 seconds if can't connect
+        greetingTimeout: 5000,    // Fail after 5 seconds if no greeting
     });
 
     const verificationUrl = `${process.env.NEXTAUTH_URL}/verify-email?token=${token}`;
@@ -50,10 +55,15 @@ export async function sendPasswordResetEmail(to: string, token: string) {
         host: "smtp.gmail.com",
         port: 465,
         secure: true,
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS?.replace(/\s+/g, ""),
         },
+        connectionTimeout: 10000,
+        greetingTimeout: 5000,
     });
 
     const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
