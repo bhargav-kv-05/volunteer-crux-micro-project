@@ -1,24 +1,14 @@
+import { Resend } from "resend";
 
-import nodemailer from "nodemailer";
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendVerificationEmail(to: string, token: string): Promise<{ success: boolean; error?: string }> {
-    const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS?.replace(/\s+/g, ""),
-        },
-        connectionTimeout: 60000, // Wait 60 seconds
-        greetingTimeout: 30000,   // Wait 30 seconds for greeting
-        socketTimeout: 60000,     // Wait 60 seconds for data
-    });
-
     const verificationUrl = `${process.env.NEXTAUTH_URL}/verify-email?token=${token}`;
 
     try {
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to,
+        await resend.emails.send({
+            from: "Volunteer Crux <onboarding@resend.dev>",
+            to: to, // 'to' must be the verified email on Resend (or any email if domain is verified)
             subject: "Verify Your Email - Volunteer Crux",
             html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -33,33 +23,23 @@ export async function sendVerificationEmail(to: string, token: string): Promise<
         </div>
       `,
         });
-        console.log(`✅ Email sent for to ${to}`);
+        console.log(`✅ Verification email sent to ${to}`);
         return { success: true };
     } catch (error: any) {
-        console.error("❌ Error sending email:", error);
+        console.error("❌ Error sending verification email:", error);
         return { success: false, error: error.message || "Unknown error" };
     }
 }
 
 export async function sendPasswordResetEmail(to: string, token: string) {
-    const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS?.replace(/\s+/g, ""),
-        },
-        connectionTimeout: 60000,
-        greetingTimeout: 30000,
-        socketTimeout: 60000,
-    });
-
     const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
 
-    const mailOptions = {
-        from: `"Volunteer Crux Support" <${process.env.EMAIL_USER}>`,
-        to,
-        subject: "Reset Your Password - Volunteer Crux",
-        html: `
+    try {
+        await resend.emails.send({
+            from: "Volunteer Crux <onboarding@resend.dev>",
+            to: to,
+            subject: "Reset Your Password - Volunteer Crux",
+            html: `
             <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
                 <h2>Password Reset Request</h2>
                 <p>Hello,</p>
@@ -74,10 +54,7 @@ export async function sendPasswordResetEmail(to: string, token: string) {
                 <p>Best regards,<br>The Volunteer Crux Team</p>
             </div>
         `,
-    };
-
-    try {
-        await transporter.sendMail(mailOptions);
+        });
         console.log(`✅ Password reset email sent to ${to}`);
         return true;
     } catch (error) {
