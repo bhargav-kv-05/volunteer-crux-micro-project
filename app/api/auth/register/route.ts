@@ -48,7 +48,9 @@ export async function POST(req: Request) {
         });
 
         // 7. Send Real Verification Email
+        console.log(`Attempting to send verification email to: ${email}`);
         const emailSent = await sendVerificationEmail(email, verifyToken);
+        console.log(`Email sending result: ${emailSent}`);
 
         if (!emailSent) {
             return NextResponse.json(

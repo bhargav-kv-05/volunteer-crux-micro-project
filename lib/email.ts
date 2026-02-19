@@ -3,10 +3,12 @@ import nodemailer from "nodemailer";
 
 export async function sendVerificationEmail(to: string, token: string) {
     const transporter = nodemailer.createTransport({
-        service: "gmail",
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true, // Use SSL
         auth: {
             user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS, // App Password, NOT regular password
+            pass: process.env.EMAIL_PASS?.replace(/\s+/g, ""), // Remove spaces from App Password
         },
     });
 
@@ -45,10 +47,12 @@ export async function sendVerificationEmail(to: string, token: string) {
 
 export async function sendPasswordResetEmail(to: string, token: string) {
     const transporter = nodemailer.createTransport({
-        service: "gmail",
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
         auth: {
             user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
+            pass: process.env.EMAIL_PASS?.replace(/\s+/g, ""),
         },
     });
 
