@@ -3,18 +3,14 @@ import nodemailer from "nodemailer";
 
 export async function sendVerificationEmail(to: string, token: string): Promise<{ success: boolean; error?: string }> {
     const transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false, // Use STARTTLS
+        service: "gmail",
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS?.replace(/\s+/g, ""),
         },
-        tls: {
-            rejectUnauthorized: false // Helps with some cloud server SSL issues
-        },
-        connectionTimeout: 10000,
-        greetingTimeout: 5000,
+        connectionTimeout: 60000, // Wait 60 seconds
+        greetingTimeout: 30000,   // Wait 30 seconds for greeting
+        socketTimeout: 60000,     // Wait 60 seconds for data
     });
 
     const verificationUrl = `${process.env.NEXTAUTH_URL}/verify-email?token=${token}`;
@@ -47,18 +43,14 @@ export async function sendVerificationEmail(to: string, token: string): Promise<
 
 export async function sendPasswordResetEmail(to: string, token: string) {
     const transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false,
+        service: "gmail",
         auth: {
             user: process.env.EMAIL_USER,
             pass: process.env.EMAIL_PASS?.replace(/\s+/g, ""),
         },
-        tls: {
-            rejectUnauthorized: false
-        },
-        connectionTimeout: 10000,
-        greetingTimeout: 5000,
+        connectionTimeout: 60000,
+        greetingTimeout: 30000,
+        socketTimeout: 60000,
     });
 
     const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
