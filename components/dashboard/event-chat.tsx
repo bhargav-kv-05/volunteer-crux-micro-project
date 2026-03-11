@@ -130,10 +130,10 @@ export default function EventChat({ eventId, eventTitle, organizerId }: { eventI
                                         <span className="text-[10px] text-gray-400">{msg.timestamp}</span>
                                     </div>
                                     <div className={`p-3 rounded-lg text-sm shadow-sm ${isMe
-                                            ? "bg-primary text-primary-foreground rounded-tr-none"
-                                            : isAnnouncement
-                                                ? "bg-red-50 border border-red-100 text-red-900 rounded-tl-none"
-                                                : "bg-white border rounded-tl-none"
+                                        ? "bg-primary text-primary-foreground rounded-tr-none"
+                                        : isAnnouncement
+                                            ? "bg-red-50 border border-red-100 text-red-900 rounded-tl-none"
+                                            : "bg-white border rounded-tl-none"
                                         }`}>
                                         {msg.message}
                                     </div>
