@@ -1,25 +1,38 @@
-export async function sendVerificationEmail(to: string, token: string): Promise<{ success: boolean; error?: string }> {
-    const verificationUrl = `${process.env.NEXTAUTH_URL}/verify-email?token=${token}`;
-    const brevoApiKey = process.env.BREVO_API_KEY;
-    const senderEmail = process.env.EMAIL_USER || "bhargavkv05@gmail.com";
+import nodemailer from "nodemailer";
 
-    if (!brevoApiKey) {
-        console.error("❌ BREVO_API_KEY is not set.");
+// Helper to safely format the base URL and avoid double trailing slashes (//verify-email)
+function getBaseUrl() {
+    return process.env.NEXTAUTH_URL?.replace(/\/$/, '') || "http://localhost:3000";
+}
+
+export async function sendVerificationEmail(to: string, token: string): Promise<{ success: boolean; error?: string }> {
+    const baseUrl = getBaseUrl();
+    const verificationUrl = `${baseUrl}/verify-email?token=${token}`;
+    const userEmail = process.env.EMAIL_USER || "bhargavkv05@gmail.com";
+    
+    // Safely parse the password. Google App passwords often copy with spaces (e.g. "pxct ujcc wgjw cnir"). 
+    // We strip all spaces here to guarantee Nodemailer's SMTP authentication doesn't fail.
+    const appPassword = process.env.EMAIL_PASS?.replace(/\s+/g, '');
+
+    if (!appPassword) {
+        console.error("❌ EMAIL_PASS is not set.");
         return { success: false, error: "Email configuration missing." };
     }
 
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: userEmail,
+            pass: appPassword,
+        },
+    });
+
     try {
-        const response = await fetch("https://api.brevo.com/v3/smtp/email", {
-            method: "POST",
-            headers: {
-                "api-key": brevoApiKey,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                sender: { name: "Volunteer Crux", email: senderEmail },
-                to: [{ email: to }],
-                subject: "Verify Your Email - Volunteer Crux",
-                htmlContent: `
+        await transporter.sendMail({
+            from: `"Volunteer Crux" <${userEmail}>`,
+            to: to,
+            subject: "Verify Your Email - Volunteer Crux",
+            html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                   <h2 style="color: #4CAF50;">Welcome to Volunteer Crux!</h2>
                   <p>Hello,</p>
@@ -30,45 +43,42 @@ export async function sendVerificationEmail(to: string, token: string): Promise<
                   <p>Or click this link: <a href="${verificationUrl}">${verificationUrl}</a></p>
                   <p>This link will expire in 24 hours.</p>
                 </div>
-              `
-            })
+            `
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(JSON.stringify(errorData));
-        }
-
-        console.log(`✅ Verification email sent to ${to} via Brevo`);
+        console.log(`✅ Verification email sent to ${to} via Gmail`);
         return { success: true };
     } catch (error: any) {
-        console.error("❌ Error sending verification email (Brevo):", error);
+        console.error("❌ Error sending verification email (Gmail):", error);
         return { success: false, error: error.message || "Unknown error" };
     }
 }
 
 export async function sendPasswordResetEmail(to: string, token: string) {
-    const resetUrl = `${process.env.NEXTAUTH_URL}/reset-password?token=${token}`;
-    const brevoApiKey = process.env.BREVO_API_KEY;
-    const senderEmail = process.env.EMAIL_USER || "bhargavkv05@gmail.com";
+    const baseUrl = getBaseUrl();
+    const resetUrl = `${baseUrl}/reset-password?token=${token}`;
+    const userEmail = process.env.EMAIL_USER || "bhargavkv05@gmail.com";
+    const appPassword = process.env.EMAIL_PASS?.replace(/\s+/g, '');
 
-    if (!brevoApiKey) {
-        console.error("❌ BREVO_API_KEY is not set.");
+    if (!appPassword) {
+        console.error("❌ EMAIL_PASS is not set.");
         return false;
     }
 
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: userEmail,
+            pass: appPassword,
+        },
+    });
+
     try {
-        const response = await fetch("https://api.brevo.com/v3/smtp/email", {
-            method: "POST",
-            headers: {
-                "api-key": brevoApiKey,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                sender: { name: "Volunteer Crux Support", email: senderEmail },
-                to: [{ email: to }],
-                subject: "Reset Your Password - Volunteer Crux",
-                htmlContent: `
+        await transporter.sendMail({
+            from: `"Volunteer Crux Support" <${userEmail}>`,
+            to: to,
+            subject: "Reset Your Password - Volunteer Crux",
+            html: `
                 <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
                     <h2>Password Reset Request</h2>
                     <p>Hello,</p>
@@ -83,18 +93,12 @@ export async function sendPasswordResetEmail(to: string, token: string) {
                     <p>Best regards,<br>The Volunteer Crux Team</p>
                 </div>
             `
-            })
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(JSON.stringify(errorData));
-        }
-
-        console.log(`✅ Password reset email sent to ${to} via Brevo`);
+        console.log(`✅ Password reset email sent to ${to} via Gmail`);
         return true;
     } catch (error) {
-        console.error("❌ Error sending password reset email (Brevo):", error);
+        console.error("❌ Error sending password reset email (Gmail):", error);
         return false;
     }
 }
