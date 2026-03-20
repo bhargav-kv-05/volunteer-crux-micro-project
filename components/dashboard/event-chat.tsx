@@ -65,8 +65,15 @@ export default function EventChat({ eventId, eventTitle, organizerId }: { eventI
             channel: activeChannel,
         };
 
-        // Emit message to server
+        // Emit message to server for live chat UI
         socket.emit("send_message", messageData);
+
+        // Quietly trigger the persistent database notification for offline users
+        fetch("/api/notifications/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ eventId, message: input, channel: activeChannel })
+        }).catch(err => console.error("Failed to insert notification", err));
 
         setInput("");
     };

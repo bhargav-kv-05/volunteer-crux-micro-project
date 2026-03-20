@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Bell, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,6 +19,42 @@ import Link from "next/link"
 export function DashboardHeader() {
   const { data: session } = useSession();
   const user = session?.user;
+
+  const [notifications, setNotifications] = useState<any[]>([]);
+
+  // Fetch notifications on mount
+  useEffect(() => {
+    if (user?.id) {
+        fetch("/api/notifications")
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) setNotifications(data);
+            })
+            .catch(console.error);
+    }
+  }, [user?.id]);
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  const markAsRead = async (id: string) => {
+      // Optimistically update local UI instantly
+      setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
+      
+      await fetch("/api/notifications", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ notificationId: id })
+      });
+  };
+
+  const markAllAsRead = async () => {
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      await fetch("/api/notifications", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ notificationId: "ALL" })
+      });
+  };
 
   // Get initials for avatar fallback
   const getInitials = (name: string | null | undefined) => {
@@ -48,14 +85,43 @@ export function DashboardHeader() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5 text-gray-700" />
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
+              {unreadCount > 0 && (
+                  <span className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
+                      {unreadCount}
+                  </span>
+              )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-64">
-            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <div className="p-4 text-sm text-gray-500 text-center">
-              All caught up! No new notifications.
+          <DropdownMenuContent align="end" className="w-80 overflow-hidden p-0">
+            <div className="flex items-center justify-between px-4 py-3 bg-gray-50/80 border-b">
+                <span className="font-semibold text-sm">Notifications</span>
+                {unreadCount > 0 && (
+                    <Button variant="ghost" size="sm" className="h-auto p-0 text-xs text-blue-600 hover:text-blue-800 font-medium" onClick={markAllAsRead}>
+                        Mark all read
+                    </Button>
+                )}
+            </div>
+            <div className="max-h-[350px] overflow-y-auto">
+                {notifications.length === 0 ? (
+                    <div className="p-8 text-sm text-gray-400 text-center flex flex-col items-center gap-3">
+                        <div className="p-3 bg-gray-50 rounded-full">
+                            <Bell className="h-6 w-6 text-gray-300" />
+                        </div>
+                        <p>All caught up!</p>
+                    </div>
+                ) : (
+                    notifications.map(n => (
+                        <DropdownMenuItem key={n._id} className={`p-4 border-b border-gray-50 cursor-pointer flex flex-col items-start gap-1 rounded-none transition-colors ${!n.isRead ? 'bg-blue-50/40 hover:bg-blue-50/60' : 'hover:bg-gray-50'}`} onClick={() => markAsRead(n._id)} asChild>
+                            <Link href={n.link} className="w-full">
+                                <div className="flex items-start justify-between w-full mb-1">
+                                    <span className={`text-sm ${!n.isRead ? 'font-semibold text-gray-900' : 'font-medium text-gray-700'} line-clamp-1`}>{n.title}</span>
+                                    {!n.isRead && <span className="h-2 w-2 rounded-full bg-blue-500 shrink-0 mt-1.5 ml-3" />}
+                                </div>
+                                <span className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{n.message}</span>
+                            </Link>
+                        </DropdownMenuItem>
+                    ))
+                )}
             </div>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -79,7 +79,9 @@ export default function EventDetailsPage() {
     if (loading) return <div className="flex h-96 items-center justify-center"><Loader2 className="animate-spin text-green-600" /></div>;
     if (!event) return null;
 
+    const isOrganizer = session?.user?.id === event.organizer;
     const isJoined = event.volunteers.includes(session?.user?.id || "");
+    const canViewChat = isJoined || isOrganizer;
     const isFull = event.filled >= event.spots;
 
     return (
@@ -156,8 +158,8 @@ export default function EventDetailsPage() {
                         </div>
                     </div>
 
-                    {/* Chat Section - Only visible if joined */}
-                    {isJoined && (
+                    {/* Chat Section - Only visible if joined or if organizer */}
+                    {canViewChat && (
                         <div className="mt-8">
                             <h3 className="text-xl font-bold mb-4">Team Communication</h3>
                             <EventChat
@@ -176,22 +178,24 @@ export default function EventDetailsPage() {
                             <div className="text-center space-y-1">
                                 <p className="text-sm text-gray-500">Status</p>
                                 <div className="text-xl font-bold text-green-700">
-                                    {isFull ? "Applications Closed" : "Open for Volunteers"}
+                                    {isOrganizer ? "You are the Organizer" : isFull ? "Applications Closed" : "Open for Volunteers"}
                                 </div>
                             </div>
 
                             <Button
-                                className={`w-full h-12 text-lg ${isJoined ? "bg-green-100 text-green-800 hover:bg-green-200" : "bg-green-600 hover:bg-green-700"}`}
+                                className={`w-full h-12 text-lg ${isJoined ? "bg-green-100 text-green-800 hover:bg-green-200" : isOrganizer ? "bg-blue-100 text-blue-800 hover:bg-blue-200" : "bg-green-600 hover:bg-green-700"}`}
                                 onClick={handleJoin}
-                                disabled={isJoined || isFull || joining}
+                                disabled={isJoined || isFull || joining || isOrganizer}
                             >
-                                {joining ? <Loader2 className="animate-spin" /> : isJoined ? (
+                                {joining ? <Loader2 className="animate-spin" /> : isOrganizer ? (
+                                    <span className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5" /> Managing Event</span>
+                                ) : isJoined ? (
                                     <span className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5" /> Joined</span>
                                 ) : isFull ? "Full" : "Register Now"}
                             </Button>
 
                             <div className="text-center text-xs text-gray-400">
-                                By registering, you commit to attending the event on the scheduled date.
+                                {isOrganizer ? "Manage your event from the Management tab." : "By registering, you commit to attending the event on the scheduled date."}
                             </div>
                         </CardContent>
                     </Card>
