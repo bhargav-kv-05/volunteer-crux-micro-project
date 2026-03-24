@@ -21,6 +21,8 @@ interface Event {
     spots: number;
     filled: number;
     volunteers: string[];
+    draftedTeam?: string[];
+    matchmakingRun?: boolean;
     organizer: string;
     description?: string; // Future proofing
 }
@@ -81,8 +83,13 @@ export default function EventDetailsPage() {
 
     const isOrganizer = session?.user?.id === event.organizer;
     const isJoined = event.volunteers.includes(session?.user?.id || "");
-    const canViewChat = isJoined || isOrganizer;
-    const isFull = event.filled >= event.spots;
+    const isDrafted = event.draftedTeam?.includes(session?.user?.id || "");
+    
+    // Core Engine Control: Chat is strictly off-limits until the intelligent Draft finalizes
+    const canViewChat = isOrganizer || (event.matchmakingRun ? isDrafted : false);
+    
+    // Automatically close Registration if Matchmaking Engine has fired
+    const isFull = event.matchmakingRun || event.filled >= event.spots;
 
     return (
         <div className="max-w-4xl mx-auto space-y-6 pb-10">
@@ -136,10 +143,10 @@ export default function EventDetailsPage() {
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="font-semibold flex items-center gap-2">
                                 <Users className="h-5 w-5 text-gray-500" />
-                                {event.filled} Volunteers Joined
+                                {event.matchmakingRun ? `${event.draftedTeam?.length || 0} Drafted Teammates` : `${event.volunteers.length} Applicants`}
                             </h3>
                             <Badge variant={isFull ? "destructive" : "outline"} className="bg-white">
-                                {event.spots - event.filled} Spots Left
+                                {event.matchmakingRun ? "Matchmaking Complete" : `${event.spots - event.filled} Spots Target`}
                             </Badge>
                         </div>
                         <div className="flex -space-x-3 overflow-hidden">
@@ -185,13 +192,15 @@ export default function EventDetailsPage() {
                             <Button
                                 className={`w-full h-12 text-lg ${isJoined ? "bg-green-100 text-green-800 hover:bg-green-200" : isOrganizer ? "bg-blue-100 text-blue-800 hover:bg-blue-200" : "bg-green-600 hover:bg-green-700"}`}
                                 onClick={handleJoin}
-                                disabled={isJoined || isFull || joining || isOrganizer}
+                                disabled={isJoined || isFull || joining || isOrganizer || event.matchmakingRun}
                             >
                                 {joining ? <Loader2 className="animate-spin" /> : isOrganizer ? (
                                     <span className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5" /> Managing Event</span>
+                                ) : event.matchmakingRun ? (
+                                    isDrafted ? <span className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5" /> Select Team</span> : "Not Selected"
                                 ) : isJoined ? (
-                                    <span className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5" /> Joined</span>
-                                ) : isFull ? "Full" : "Register Now"}
+                                    <span className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5" /> Entered Pool</span>
+                                ) : isFull ? "Selection Closed" : "Enter Applicant Pool"}
                             </Button>
 
                             <div className="text-center text-xs text-gray-400">

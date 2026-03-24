@@ -19,19 +19,21 @@ async function getMyTeamEvents() {
     // This is a common Mongoose fix in Next.js dev mode
     if (!User) require("@/models/User");
 
-    // Find events where the volunteers array contains the current user's ID
+    // Find events where the user is either an applicant (volunteers) or officially drafted (draftedTeam)
     const events = await Event.find({ volunteers: session.user.id })
-        .populate("volunteers", "name email") // Get details of teammates
-        .populate("organizer", "email") // Get organizer email
+        .populate("draftedTeam", "name email image") // Get drafted team details
+        .populate("volunteers", "name email image") // Get applicants
+        .populate("organizer", "email name") // Get organizer email
         .sort({ date: 1 });
 
     return events;
 }
 
 export default async function TeamPage() {
+    const session = await getServerSession(authOptions);
     const events = await getMyTeamEvents();
 
-    if (!events) {
+    if (!events || !session) {
         return <div className="p-8">Please log in to view your team.</div>;
     }
 
@@ -81,13 +83,13 @@ export default async function TeamPage() {
                                 <div className="pt-4">
                                     <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
                                         <Users className="w-4 h-4" />
-                                        Team Roster ({event.volunteers.length})
+                                        {event.matchmakingRun ? "Official Drafted Team" : "Applicant Pool"} ({event.matchmakingRun ? event.draftedTeam.length : event.volunteers.length})
                                     </h4>
                                     <div className="flex flex-wrap gap-2">
-                                        {event.volunteers.map((vol: any) => (
+                                        {(event.matchmakingRun ? event.draftedTeam : event.volunteers).map((vol: any) => (
                                             <div key={vol._id} className="flex items-center gap-2 bg-gray-100 pr-3 rounded-full border border-gray-200">
                                                 <Avatar className="h-8 w-8">
-                                                    <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${vol.email}`} />
+                                                    <AvatarImage src={vol.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${vol.email}`} />
                                                     <AvatarFallback>{vol.name?.[0] || "V"}</AvatarFallback>
                                                 </Avatar>
                                                 <span className="text-xs font-medium max-w-[80px] truncate">
@@ -100,11 +102,23 @@ export default async function TeamPage() {
                                 </div>
                             </CardContent>
                             <CardFooter className="p-4 bg-gray-50 border-t flex flex-col gap-3">
-                                <Link href={`/dashboard/events/${event._id}`} className="w-full">
-                                    <Button className="w-full" variant="outline">
-                                        <MessageCircle className="mr-2 h-4 w-4 text-green-600" /> Open Team Chat
+                                {event.matchmakingRun ? (
+                                    event.draftedTeam.some((t: any) => t._id.toString() === session.user.id) ? (
+                                        <Link href={`/dashboard/events/${event._id}`} className="w-full">
+                                            <Button className="w-full" variant="outline">
+                                                <MessageCircle className="mr-2 h-4 w-4 text-green-600" /> Open Team Chat
+                                            </Button>
+                                        </Link>
+                                    ) : (
+                                        <Button className="w-full" variant="outline" disabled>
+                                            <MessageCircle className="mr-2 h-4 w-4 text-red-500" /> Not Selected by Matchmaking Algorithm
+                                        </Button>
+                                    )
+                                ) : (
+                                    <Button className="w-full" variant="outline" disabled>
+                                        <MessageCircle className="mr-2 h-4 w-4 text-orange-400" /> Chat Locked (Awaiting Matchmaking)
                                     </Button>
-                                </Link>
+                                )}
                                 <div className="flex justify-between items-center w-full text-xs text-muted-foreground">
                                     <span>Have questions?</span>
                                     {event.organizer?.email ? (

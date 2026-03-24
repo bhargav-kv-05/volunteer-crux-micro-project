@@ -37,7 +37,11 @@ export async function GET(
                 _id: event._id,
                 title: event.title,
                 date: event.date,
-                attendees: event.attendees // Return attendees list to check status
+                attendees: event.attendees, // Return attendees list to check status
+                draftedTeam: event.draftedTeam,
+                matchmakingRun: event.matchmakingRun,
+                spots: event.spots,
+                skills: event.skills
             },
             volunteers: event.volunteers
         });

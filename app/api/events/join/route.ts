@@ -27,9 +27,9 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: "Event not found" }, { status: 404 });
         }
 
-        // Check if event is full
-        if (event.filled >= event.spots) {
-            return NextResponse.json({ message: "Event is full" }, { status: 400 });
+        // Matchmaking Logic: You cannot enter the applicant pool if the algorithm has already drafted the team
+        if (event.matchmakingRun) {
+            return NextResponse.json({ message: "Team formation has already concluded for this event!" }, { status: 400 });
         }
 
         // Check if user is already a volunteer using robust string comparison
@@ -41,12 +41,14 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: "You have already joined this event" }, { status: 400 });
         }
 
-        // Add user ID to volunteers
+        // Add user ID to applicant pool
         event.volunteers.push(session.user.id);
+        
+        // Optimistically increment the tracker so the frontend sees the applicant count
         event.filled += 1;
         await event.save();
 
-        return NextResponse.json({ message: "Successfully registered!" }, { status: 200 });
+        return NextResponse.json({ message: "Entered Applicant Pool! Awaiting Algorithm Selection." }, { status: 200 });
 
     } catch (error) {
         console.error("Error joining event:", error);

@@ -27,6 +27,18 @@ const EventSchema = new Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "User"
         }],
+
+        // The intelligently formed algorithmic team (Drafted Applicants)
+        draftedTeam: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        }],
+
+        // Has the Intelligent Matchmaking Algorithm been executed yet?
+        matchmakingRun: {
+            type: Boolean,
+            default: false
+        }
     },
     { timestamps: true }
 );
