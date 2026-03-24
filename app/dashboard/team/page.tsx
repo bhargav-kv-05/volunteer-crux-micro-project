@@ -112,7 +112,7 @@ export default async function TeamPage() {
                                             href={`mailto:${event.organizer.email}?subject=Question regarding ${event.title}`}
                                             className="text-primary hover:underline font-medium flex items-center gap-1"
                                         >
-                                            Email Organizer ✉️
+                                            {event.organizer.email.split("@")[0]} ✉️
                                         </a>
                                     ) : (
                                         <span className="text-gray-400">

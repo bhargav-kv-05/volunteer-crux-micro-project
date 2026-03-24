@@ -201,11 +201,18 @@ export default function ManagementPage() {
                                         <h3 className="font-semibold">{event.title}</h3>
                                         <p className="text-sm text-gray-500">{event.date} • {event.location}</p>
                                     </div>
-                                    <Button asChild variant="outline">
-                                        <a href={`/dashboard/management/event/${event._id}`}>
-                                            Manage Attendance
-                                        </a>
-                                    </Button>
+                                    <div className="flex items-center gap-2">
+                                        <Button asChild variant="default">
+                                            <a href={`/dashboard/events/${event._id}`}>
+                                                Open Team Chat
+                                            </a>
+                                        </Button>
+                                        <Button asChild variant="outline">
+                                            <a href={`/dashboard/management/event/${event._id}`}>
+                                                Manage Attendance
+                                            </a>
+                                        </Button>
+                                    </div>
                                 </div>
                             </Card>
                         ))
