@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Award, Calendar, ExternalLink } from "lucide-react";
+import { Award, Calendar, ExternalLink, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface CertificateProps {
@@ -28,7 +28,8 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
                 }
             `}</style>
 
-            <Card className="relative w-full max-w-5xl aspect-[1.414/1] mx-auto shadow-2xl bg-[#fffdf5] border-8 border-double border-green-800 print:shadow-none print:border-8 print:w-full print:h-full print:rounded-none overflow-hidden">
+            {/* The certificate is scaled dynamically using w-full and an aspect ratio. Shrinking slightly using scale-95 to prevent cutting off corners on weird aspect ratio screens */}
+            <Card className="relative w-full max-w-5xl aspect-[1.414/1] min-h-[400px] md:min-h-[600px] mx-auto shadow-2xl bg-[#fffdf5] border-8 border-double border-green-800 print:shadow-none print:border-8 print:w-full print:h-full print:rounded-none overflow-hidden scale-95 md:scale-100">
 
                 {/* Decorative Corner Ornaments */}
                 <div className="absolute top-0 left-0 w-32 h-32 border-t-8 border-l-8 border-green-700 rounded-tl-3xl m-4 opacity-50"></div>
@@ -75,12 +76,15 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
                             <span className="text-xs uppercase tracking-widest text-gray-500">Date</span>
                         </div>
 
-                        {/* Seal */}
-                        <div className="relative">
-                            <div className="w-24 h-24 border-4 border-green-700 rounded-full flex items-center justify-center opacity-80">
-                                <div className="w-20 h-20 bg-green-700 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-inner">
-                                    VC
-                                </div>
+                        {/* Official NGO Seal */}
+                        <div className="relative flex flex-col items-center justify-center">
+                            <div className="w-28 h-28 border-[6px] border-double border-green-800 rounded-full flex flex-col items-center justify-center bg-green-50 shadow-xl relative z-10 overflow-hidden">
+                                <div className="absolute inset-0 rounded-full border border-green-600 border-dashed m-1"></div>
+                                <ShieldCheck className="h-10 w-10 text-green-700 mb-1" />
+                                <span className="text-[8px] font-bold text-green-800 tracking-widest uppercase">Verified</span>
+                            </div>
+                            <div className="absolute -bottom-3 bg-green-800 text-white text-[10px] font-bold px-4 py-1 rounded-full uppercase tracking-widest shadow-md z-20 whitespace-nowrap">
+                                Official NGO Partner
                             </div>
                         </div>
 

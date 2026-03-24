@@ -21,14 +21,24 @@ export function DashboardHeader() {
   const user = session?.user;
 
   const [notifications, setNotifications] = useState<any[]>([]);
+  const [livePoints, setLivePoints] = useState(user?.points || 0);
 
-  // Fetch notifications on mount
+  // Fetch dynamic data on mount
   useEffect(() => {
     if (user?.id) {
+        // Fetch notifications
         fetch("/api/notifications")
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) setNotifications(data);
+            })
+            .catch(console.error);
+
+        // Fetch live points to fix NextAuth static token desync
+        fetch("/api/user/profile")
+            .then(res => res.json())
+            .then(data => {
+                if (data && typeof data.points === 'number') setLivePoints(data.points);
             })
             .catch(console.error);
     }
@@ -76,9 +86,9 @@ export function DashboardHeader() {
         </div>
       </div>
       <div className="flex items-center gap-4">
-        {user?.points && user.points > 0 && (
+        {livePoints > 0 && (
           <div className="hidden md:flex items-center text-sm font-medium text-yellow-600 bg-yellow-50 px-3 py-1 rounded-full border border-yellow-200 mr-2">
-            🏆 {user.points} pts
+            🏆 {livePoints} pts
           </div>
         )}
         <DropdownMenu>
