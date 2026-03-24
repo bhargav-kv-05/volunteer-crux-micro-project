@@ -40,10 +40,17 @@ export default function EventChat({ eventId, eventTitle, organizerId }: { eventI
             setMessages((prev) => [...prev, msgWithChannel]);
         };
 
+        // Load entire chat history upon connection
+        const handleHistory = (history: Message[]) => {
+            setMessages(history.map(msg => ({ ...msg, channel: msg.channel || "general" })));
+        };
+
         socket.on("receive_message", handleMessage);
+        socket.on("chat_history", handleHistory);
 
         return () => {
             socket.off("receive_message", handleMessage);
+            socket.off("chat_history", handleHistory);
         };
     }, [socket, isConnected, eventId]);
 
