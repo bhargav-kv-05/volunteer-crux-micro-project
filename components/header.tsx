@@ -12,12 +12,12 @@ export function Header() {
         </div>
 
         <nav className="hidden items-center gap-8 md:flex">
-          <a href="#" className="text-sm font-medium text-foreground transition-colors hover:text-primary">
+          <Link href="/" className="text-sm font-medium text-foreground transition-colors hover:text-primary">
             Home
-          </a>
-          <a href="#" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+          </Link>
+          <Link href="/login" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
             Explore
-          </a>
+          </Link>
         </nav>
 
         <div className="flex items-center gap-3">

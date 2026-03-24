@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function Footer() {
   return (
     <footer className="border-t border-border bg-background">
@@ -6,16 +8,16 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} Volunteer Crux. All rights reserved.
           </p>
-          <div className="flex gap-6">
-            <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+          <div className="flex flex-wrap gap-4 sm:gap-6 justify-center">
+            <Link href="/privacy" className="text-sm text-muted-foreground transition-colors hover:text-primary">
               Privacy Policy
-            </a>
-            <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+            </Link>
+            <Link href="/terms" className="text-sm text-muted-foreground transition-colors hover:text-primary">
               Terms of Service
-            </a>
-            <a href="#" className="text-sm text-muted-foreground transition-colors hover:text-primary">
+            </Link>
+            <Link href="/join-ngo" className="text-sm text-muted-foreground transition-colors hover:text-primary">
               Contact
-            </a>
+            </Link>
           </div>
         </div>
       </div>
