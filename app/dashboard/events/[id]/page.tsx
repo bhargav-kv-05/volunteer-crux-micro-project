@@ -85,8 +85,8 @@ export default function EventDetailsPage() {
     const isJoined = event.volunteers.includes(session?.user?.id || "");
     const isDrafted = event.draftedTeam?.includes(session?.user?.id || "");
     
-    // Core Engine Control: Chat is strictly off-limits until the intelligent Draft finalizes
-    const canViewChat = isOrganizer || (event.matchmakingRun ? isDrafted : false);
+    // Core Engine Control: ALL applicants can access the Group Chat. Only Drafted members unlock the specific Team Chat Tab.
+    const canViewChat = isJoined || isOrganizer;
     
     // Automatically close Registration if Matchmaking Engine has fired
     const isFull = event.matchmakingRun || event.filled >= event.spots;
@@ -173,6 +173,7 @@ export default function EventDetailsPage() {
                                 eventId={event._id}
                                 eventTitle={event.title}
                                 organizerId={event.organizer}
+                                isDrafted={isDrafted || false}
                             />
                         </div>
                     )}

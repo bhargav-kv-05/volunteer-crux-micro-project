@@ -110,14 +110,18 @@ export default async function TeamPage() {
                                             </Button>
                                         </Link>
                                     ) : (
-                                        <Button className="w-full" variant="outline" disabled>
-                                            <MessageCircle className="mr-2 h-4 w-4 text-red-500" /> Not Selected by Matchmaking Algorithm
-                                        </Button>
+                                        <Link href={`/dashboard/events/${event._id}`} className="w-full">
+                                            <Button className="w-full" variant="outline">
+                                                <MessageCircle className="mr-2 h-4 w-4 text-blue-500" /> Open Group Chat
+                                            </Button>
+                                        </Link>
                                     )
                                 ) : (
-                                    <Button className="w-full" variant="outline" disabled>
-                                        <MessageCircle className="mr-2 h-4 w-4 text-orange-400" /> Chat Locked (Awaiting Matchmaking)
-                                    </Button>
+                                    <Link href={`/dashboard/events/${event._id}`} className="w-full">
+                                        <Button className="w-full" variant="outline">
+                                            <MessageCircle className="mr-2 h-4 w-4 text-blue-500" /> Open Group Chat
+                                        </Button>
+                                    </Link>
                                 )}
                                 <div className="flex justify-between items-center w-full text-xs text-muted-foreground">
                                     <span>Have questions?</span>

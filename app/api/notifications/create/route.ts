@@ -53,7 +53,7 @@ export async function POST(req: Request) {
             title,
             // Truncate the message preview to 60 chars so the UI dropdown doesn't look messy
             message: message.length > 60 ? message.substring(0, 60) + "..." : message,
-            link: `/dashboard/events/${eventId}`,
+            link: `/dashboard/events/${eventId}?channel=${channel || "group"}`,
             isRead: false
         }));
 
