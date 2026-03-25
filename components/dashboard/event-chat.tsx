@@ -90,7 +90,7 @@ export default function EventChat({ eventId, eventTitle, organizerId, isDrafted 
             user: session.user.name || "Anonymous",
             avatar: session.user.image,
             message: input,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            timestamp: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
             channel: activeChannel,
         };
 
