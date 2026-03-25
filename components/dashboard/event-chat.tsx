@@ -38,6 +38,17 @@ export default function EventChat({ eventId, eventTitle, organizerId, isDrafted 
 
     const [activeChannel, setActiveChannel] = useState<"group" | "team" | "announcements">(safeInitialChannel);
 
+    // Deep sync: Ensure Next.js client-side navigation (clicking via dropdown without hard refresh) updates the UI automatically
+    useEffect(() => {
+        if (queryChannel === "announcements") {
+            setActiveChannel("announcements");
+        } else if (queryChannel === "team" && (isDrafted || isOrganizer)) {
+            setActiveChannel("team");
+        } else if (queryChannel === "group") {
+            setActiveChannel("group");
+        }
+    }, [queryChannel, isDrafted, isOrganizer]);
+
     useEffect(() => {
         if (!socket || !isConnected) return;
 
@@ -132,7 +143,7 @@ export default function EventChat({ eventId, eventTitle, organizerId, isDrafted 
                             onClick={() => setActiveChannel("announcements")}
                             className={`flex flex-1 items-center justify-center gap-2 text-sm font-medium py-2 rounded-md transition-all whitespace-nowrap px-3 ${activeChannel === "announcements" ? "bg-white shadow text-primary" : "text-gray-500 hover:text-gray-700"}`}
                         >
-                            <Megaphone className="h-4 w-4" /> Alerts
+                            <Megaphone className="h-4 w-4" /> Announcements
                         </button>
                     </div>
                 </CardTitle>
