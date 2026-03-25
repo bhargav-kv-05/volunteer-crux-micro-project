@@ -5,7 +5,10 @@ import Event from "@/models/Event";
 import User from "@/models/User";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(
+    req: Request,
+    props: { params: Promise<{ id: string }> }
+) {
     try {
         const session = await getServerSession(authOptions);
 
@@ -16,6 +19,8 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
         await connectToDatabase();
         
+        const params = await props.params;
+
         // Find the event and explicitly populate the volunteers (applicants) to access their skills array
         const event = await Event.findById(params.id).populate({
             path: 'volunteers',
