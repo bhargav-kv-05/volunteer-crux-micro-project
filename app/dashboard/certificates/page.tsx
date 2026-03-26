@@ -82,7 +82,7 @@ export default function CertificatesPage() {
                                             View Certificate
                                         </Button>
                                     </DialogTrigger>
-                                    <DialogContent className="max-w-5xl w-full p-0 bg-transparent border-none shadow-none">
+                                    <DialogContent className="max-w-5xl w-full max-h-[90vh] overflow-y-auto p-2 sm:p-6 md:p-8 bg-transparent border-none shadow-none hide-scrollbar">
                                         <CertificateCard
                                             volunteerName={session?.user?.name || "Volunteer"}
                                             eventName={event.title}

@@ -38,16 +38,18 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
                 </p>
             </div>
 
-            {/* The certificate is scaled dynamically. Removed aspect-ratio constraint to allow the background wrapper to dynamically extend around all child objects without clipping them out text. */}
-            <Card className="relative w-full max-w-5xl min-h-[400px] md:min-h-[600px] mx-auto shadow-2xl bg-[#fffdf5] border-8 border-double border-green-800 print:shadow-none print:border-8 print:w-full print:h-full print:rounded-none scale-95 md:scale-100 pb-8">
+            {/* The certificate is mathematically frozen to a standardized A4 landscape aspect ratio and width (1024x724). To make it responsive on all desktop/mobile screens without breaking the internal padding, we use CSS transform rules to natively scale it down like an image natively! */}
+            <div className="w-full flex justify-center items-start overflow-hidden print:overflow-visible min-h-[400px] sm:min-h-[500px] md:min-h-[700px]">
+                <div className="transform scale-[0.45] xs:scale-[0.55] sm:scale-[0.7] md:scale-[0.9] lg:scale-100 origin-top transition-transform duration-300 shrink-0 print:scale-100 print:w-full">
+                    <Card className="relative w-[1024px] aspect-[1.414/1] mx-auto shadow-2xl bg-[#fffdf5] border-[12px] border-double border-green-800 print:shadow-none print:border-none print:w-full print:h-full print:rounded-none">
 
-                {/* Decorative Corner Ornaments */}
-                <div className="absolute top-0 left-0 w-32 h-32 border-t-8 border-l-8 border-green-700 rounded-tl-3xl m-4 opacity-50"></div>
-                <div className="absolute top-0 right-0 w-32 h-32 border-t-8 border-r-8 border-green-700 rounded-tr-3xl m-4 opacity-50"></div>
-                <div className="absolute bottom-0 left-0 w-32 h-32 border-b-8 border-l-8 border-green-700 rounded-bl-3xl m-4 opacity-50"></div>
-                <div className="absolute bottom-0 right-0 w-32 h-32 border-b-8 border-r-8 border-green-700 rounded-br-3xl m-4 opacity-50"></div>
+                        {/* Decorative Corner Ornaments */}
+                        <div className="absolute top-0 left-0 w-40 h-40 border-t-[12px] border-l-[12px] border-green-700 rounded-tl-[40px] m-6 opacity-50"></div>
+                        <div className="absolute top-0 right-0 w-40 h-40 border-t-[12px] border-r-[12px] border-green-700 rounded-tr-[40px] m-6 opacity-50"></div>
+                        <div className="absolute bottom-0 left-0 w-40 h-40 border-b-[12px] border-l-[12px] border-green-700 rounded-bl-[40px] m-6 opacity-50"></div>
+                        <div className="absolute bottom-0 right-0 w-40 h-40 border-b-[12px] border-r-[12px] border-green-700 rounded-br-[40px] m-6 opacity-50"></div>
 
-                <CardContent className="flex flex-col items-center justify-center h-full p-8 md:p-16 text-center space-y-6 md:space-y-8 relative z-10">
+                        <CardContent className="flex flex-col items-center justify-center h-full p-16 text-center space-y-8 relative z-10">
 
                     {/* Header */}
                     <div className="space-y-4">
@@ -106,6 +108,8 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
 
                 </CardContent>
             </Card>
+                </div>
+            </div>
 
         </div>
     );
