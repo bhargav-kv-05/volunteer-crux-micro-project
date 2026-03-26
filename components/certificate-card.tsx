@@ -24,32 +24,42 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
             <style jsx global>{`
                 @media print {
                     @page { size: landscape; margin: 0; }
-                    body { -webkit-print-color-adjust: exact; }
+                    body { -webkit-print-color-adjust: exact; background: white !important; }
+                    body * { visibility: hidden !important; }
+                    #printable-certificate, #printable-certificate * { visibility: visible !important; }
+                    #printable-certificate {
+                        position: fixed !important;
+                        left: 0 !important;
+                        top: 0 !important;
+                        width: 100vw !important;
+                        height: 100vh !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        z-index: 99999 !important;
+                    }
                 }
             `}</style>
 
-            {/* Floating Action Bar - Anchored above the Certificate for visibility in tall Modals */}
-            <div className="mb-6 print:hidden flex flex-col items-center animate-in fade-in slide-in-from-top-4">
-                <Button onClick={handlePrint} size="lg" className="gap-2 bg-green-600 hover:bg-green-700 shadow-xl border border-green-500 text-white font-bold tracking-wide">
-                    <Download className="h-5 w-5" /> Download Certificate (Save as PDF)
+            {/* Simplified Action Bar */}
+            <div className="mb-6 print:hidden flex flex-col items-center w-full">
+                <Button onClick={handlePrint} size="lg" className="gap-2 bg-green-700 hover:bg-green-800 text-white shadow-md font-semibold tracking-wide h-12 px-8">
+                    <Download className="h-5 w-5" /> EXPORT AS PDF
                 </Button>
-                <p className="text-sm text-gray-200 mt-3 font-medium px-4 py-1 bg-black/40 rounded-full shadow-inner backdrop-blur-sm">
-                    In the Print Menu, select "Save as PDF" to download your copy.
+                <p className="text-xs text-muted-foreground mt-2 italic flex items-center gap-1">
+                    (Select "Save as PDF" in the print menu)
                 </p>
             </div>
 
-            {/* The certificate is mathematically frozen to a standardized A4 landscape aspect ratio and width (1024x724). To make it responsive on all desktop/mobile screens without breaking the internal padding, we use CSS transform rules to natively scale it down like an image natively! */}
-            <div className="w-full flex justify-center items-start overflow-hidden print:overflow-visible min-h-[400px] sm:min-h-[500px] md:min-h-[700px]">
-                <div className="transform scale-[0.45] xs:scale-[0.55] sm:scale-[0.7] md:scale-[0.9] lg:scale-100 origin-top transition-transform duration-300 shrink-0 print:scale-100 print:w-full">
-                    <Card className="relative w-[1024px] aspect-[1.414/1] mx-auto shadow-2xl bg-[#fffdf5] border-[12px] border-double border-green-800 print:shadow-none print:border-none print:w-full print:h-full print:rounded-none">
+            {/* Completely Fluid Native HTML Layout. Automatically expands height to strictly contain heavy text without clipping the borders! */}
+            <Card id="printable-certificate" className="relative w-full max-w-[1024px] h-auto min-h-[400px] sm:min-h-[500px] md:min-h-[700px] mx-auto shadow-2xl bg-[#fffdf5] border-[8px] md:border-[12px] border-double border-green-800 print:shadow-none print:border-none print:rounded-none overflow-hidden print:overflow-visible flex flex-col items-center justify-center">
 
-                        {/* Decorative Corner Ornaments */}
-                        <div className="absolute top-0 left-0 w-40 h-40 border-t-[12px] border-l-[12px] border-green-700 rounded-tl-[40px] m-6 opacity-50"></div>
-                        <div className="absolute top-0 right-0 w-40 h-40 border-t-[12px] border-r-[12px] border-green-700 rounded-tr-[40px] m-6 opacity-50"></div>
-                        <div className="absolute bottom-0 left-0 w-40 h-40 border-b-[12px] border-l-[12px] border-green-700 rounded-bl-[40px] m-6 opacity-50"></div>
-                        <div className="absolute bottom-0 right-0 w-40 h-40 border-b-[12px] border-r-[12px] border-green-700 rounded-br-[40px] m-6 opacity-50"></div>
+                {/* Responsive Decorative Corner Ornaments */}
+                <div className="absolute top-0 left-0 w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 border-t-[8px] sm:border-t-[10px] md:border-t-[12px] border-l-[8px] sm:border-l-[10px] md:border-l-[12px] border-green-700 rounded-tl-[40px] m-4 md:m-6 opacity-50"></div>
+                <div className="absolute top-0 right-0 w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 border-t-[8px] sm:border-t-[10px] md:border-t-[12px] border-r-[8px] sm:border-r-[10px] md:border-r-[12px] border-green-700 rounded-tr-[40px] m-4 md:m-6 opacity-50"></div>
+                <div className="absolute bottom-0 left-0 w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 border-b-[8px] sm:border-b-[10px] md:border-b-[12px] border-l-[8px] sm:border-l-[10px] md:border-l-[12px] border-green-700 rounded-bl-[40px] m-4 md:m-6 opacity-50"></div>
+                <div className="absolute bottom-0 right-0 w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 border-b-[8px] sm:border-b-[10px] md:border-b-[12px] border-r-[8px] sm:border-r-[10px] md:border-r-[12px] border-green-700 rounded-br-[40px] m-4 md:m-6 opacity-50"></div>
 
-                        <CardContent className="flex flex-col items-center justify-center h-full p-16 text-center space-y-8 relative z-10">
+                <CardContent className="flex flex-col items-center justify-center h-full p-8 sm:p-12 md:p-16 text-center space-y-6 md:space-y-8 relative z-10">
 
                     {/* Header */}
                     <div className="space-y-4">
@@ -65,52 +75,47 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
                     </div>
 
                     {/* Body */}
-                    <div className="w-full max-w-3xl space-y-6 py-8">
+                    <div className="w-full max-w-3xl space-y-4 sm:space-y-6 py-4 md:py-8">
                         <p className="text-gray-500 italic text-lg font-serif">This certificate is proudly presented to</p>
 
-                        <div className="py-4">
-                            <span className="text-4xl md:text-5xl font-bold text-gray-900 font-serif border-b-2 border-green-600 px-12 pb-2 inline-block min-w-[50%]">
-                                {volunteerName}
-                            </span>
-                        </div>
-
-                        <p className="text-gray-500 italic text-lg font-serif">
+                        <p className="font-serif text-3xl sm:text-4xl md:text-6xl font-black text-slate-800 border-b-2 sm:border-b-4 border-green-700 pb-2 sm:pb-4 inline-block transform -rotate-1 px-4 sm:px-12 bg-white/50 rounded-xl shadow-sm">
+                            {volunteerName}
+                        </p>
+                        <p className="text-gray-600 italic text-sm sm:text-base md:text-lg">
                             for their dedicated service and successful participation in the event
                         </p>
-
-                        <h3 className="text-3xl font-bold text-green-900">{eventName}</h3>
+                        <p className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-green-900 border-t-2 sm:border-t-4 border-double border-green-300 pt-2 sm:pt-4 mx-4 sm:mx-16">
+                            {eventName}
+                        </p>
                     </div>
 
                     {/* Footer / Signatures */}
-                    <div className="flex justify-between items-end w-full max-w-4xl px-4 md:px-12 mt-8 md:mt-12 pt-8">
-                        <div className="flex flex-col items-center gap-2">
-                            <span className="font-serif text-xl border-b border-gray-400 pb-1 px-8 min-w-[200px] text-center">{date}</span>
-                            <span className="text-xs uppercase tracking-widest text-gray-500">Date</span>
+                    <div className="flex flex-col sm:flex-row justify-between items-center sm:items-end w-full max-w-4xl px-4 md:px-12 mt-8 md:mt-12 pt-8 gap-8 sm:gap-0">
+                        <div className="flex flex-col items-center gap-1 sm:gap-2">
+                            <span className="font-serif text-lg sm:text-xl border-b border-gray-400 pb-1 px-4 sm:px-8 min-w-[150px] sm:min-w-[200px] text-center">{date}</span>
+                            <span className="text-[10px] sm:text-xs uppercase tracking-widest text-gray-500">Date</span>
                         </div>
 
                         {/* Official NGO Seal */}
-                        <div className="relative flex flex-col items-center justify-center">
-                            <div className="w-28 h-28 border-[6px] border-double border-green-800 rounded-full flex flex-col items-center justify-center bg-green-50 shadow-xl relative z-10 overflow-hidden">
+                        <div className="relative flex flex-col items-center justify-center order-first sm:order-none scale-90 sm:scale-100">
+                            <div className="w-24 h-24 sm:w-28 sm:h-28 border-[4px] sm:border-[6px] border-double border-green-800 rounded-full flex flex-col items-center justify-center bg-green-50 shadow-xl relative z-10 mb-2 sm:mb-0">
                                 <div className="absolute inset-0 rounded-full border border-green-600 border-dashed m-1"></div>
-                                <ShieldCheck className="h-10 w-10 text-green-700 mb-1" />
-                                <span className="text-[8px] font-bold text-green-800 tracking-widest uppercase">Verified</span>
+                                <ShieldCheck className="h-8 w-8 sm:h-10 sm:w-10 text-green-700 mb-0.5 sm:mb-1" />
+                                <span className="text-[8px] sm:text-[10px] font-bold uppercase tracking-widest text-green-800 bg-white/50 px-1 sm:px-2 rounded">Verified</span>
                             </div>
-                            <div className="absolute -bottom-3 bg-green-800 text-white text-[10px] font-bold px-4 py-1 rounded-full uppercase tracking-widest shadow-md z-20 whitespace-nowrap">
+                            <div className="static sm:absolute sm:-bottom-3 bg-green-800 text-white text-[8px] sm:text-[10px] font-bold uppercase tracking-wider px-3 sm:px-4 py-1 rounded-full shadow-lg z-20 whitespace-nowrap">
                                 Official NGO Partner
                             </div>
                         </div>
 
-                        <div className="flex flex-col items-center gap-2">
-                            <span className="font-serif text-xl border-b border-gray-400 pb-1 px-8 min-w-[200px] text-center font-cursive">{organizerName}</span>
-                            <span className="text-xs uppercase tracking-widest text-gray-500">Organizer Signature</span>
+                        <div className="flex flex-col items-center gap-1 sm:gap-2">
+                            <span className="font-serif text-lg sm:text-xl border-b border-gray-400 pb-1 px-4 sm:px-8 min-w-[150px] sm:min-w-[200px] text-center">{organizerName}</span>
+                            <span className="text-[10px] sm:text-xs uppercase tracking-widest text-gray-500">Organizer Signature</span>
                         </div>
                     </div>
 
                 </CardContent>
             </Card>
-                </div>
-            </div>
-
         </div>
     );
 }
