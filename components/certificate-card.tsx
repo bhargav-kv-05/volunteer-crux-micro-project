@@ -55,23 +55,28 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
                     /* Destroy the dark Radix Overlay */
                     [data-radix-dialog-overlay] { display: none !important; }
 
-                    /* Break the Radix Transform trap constraints and inject back into Document Flow */
+                    /* Break the Radix Transform trap constraints and explicitly reset centering */
                     [role="dialog"] {
                         transform: none !important;
-                        position: relative !important;
-                        margin: 0 auto !important;
+                        position: absolute !important;
+                        left: 0 !important;
+                        top: 0 !important;
+                        margin: 0 !important;
                         padding: 0 !important;
                         border: none !important;
                         box-shadow: none !important;
                         background: transparent !important;
                         overflow: visible !important;
                         width: 1024px !important;
+                        height: 724px !important;
                         max-width: none !important;
                     }
 
-                    /* Pin the Certificate to the Document Flow to explicitly trigger Chrome's 'Shrink-To-Fit' algorithm */
+                    /* Pin the Certificate perfectly to the top-left Document Root to securely trigger Shrink-To-Fit */
                     #printable-certificate {
-                        position: relative !important;
+                        position: absolute !important;
+                        left: 0 !important;
+                        top: 0 !important;
                         margin: 0 !important;
                         padding: 0 !important;
                         width: 1024px !important;
