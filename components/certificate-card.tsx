@@ -15,7 +15,33 @@ interface CertificateProps {
 export function CertificateCard({ volunteerName, eventName, date, organizerName = "Volunteer Crux" }: CertificateProps) {
 
     const handlePrint = () => {
+        const cert = document.getElementById("printable-certificate");
+        if (!cert) return;
+
+        // Trace up the DOM tree to find the exact root container (Radix Portal) appended to the body
+        let portalRoot = cert;
+        while (portalRoot.parentElement && portalRoot.parentElement !== document.body) {
+            portalRoot = portalRoot.parentElement;
+        }
+
+        // Explicitly hide every single other layout node on the webpage (Next.js Root, Headers, Dashboards) natively bypassing unpredictable UI frameworks!
+        const hiddenNodes: { element: HTMLElement, originalDisplay: string }[] = [];
+        Array.from(document.body.children).forEach(child => {
+            if (child !== portalRoot && child.tagName !== 'SCRIPT' && child.tagName !== 'STYLE' && child.tagName !== 'LINK') {
+                const el = child as HTMLElement;
+                hiddenNodes.push({ element: el, originalDisplay: el.style.display });
+                el.style.display = 'none';
+            }
+        });
+
         window.print();
+
+        // After the synchronous print dialogue finishes, cleanly restore the entire website instantly!
+        setTimeout(() => {
+            hiddenNodes.forEach(node => {
+                node.element.style.display = node.originalDisplay;
+            });
+        }, 500);
     };
 
     return (
@@ -25,17 +51,12 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
                 @media print {
                     @page { size: landscape; margin: 0; }
                     body { -webkit-print-color-adjust: exact; background: white !important; }
-                    
-                    /* Hide EVERYTHING in the DOM Visually */
-                    body * { visibility: hidden !important; }
-                    
-                    /* Unhide Exclusively the Certificate and its Children */
-                    #printable-certificate, #printable-certificate * {
-                        visibility: visible !important;
-                    }
+
+                    /* Destroy the dark Radix Overlay */
+                    [data-radix-dialog-overlay] { display: none !important; }
 
                     /* Break the Radix Transform trap constraints */
-                    body [role="dialog"] {
+                    [role="dialog"] {
                         transform: none !important;
                         position: static !important;
                         margin: 0 !important;
@@ -43,6 +64,7 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
                         border: none !important;
                         box-shadow: none !important;
                         background: transparent !important;
+                        overflow: visible !important;
                     }
 
                     /* Pin the Certificate perfectly to the paper origin and enforce rigid pixel boundaries to trigger native Shrink-to-Fit */
