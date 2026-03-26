@@ -27,7 +27,7 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
             position: relative !important;
             width: 1024px !important;
             height: 724px !important;
-            margin: 0 !important;
+            margin: 0 auto !important;
             padding: 0 !important;
             background: #fffdf5 !important;
             transform: none !important;
