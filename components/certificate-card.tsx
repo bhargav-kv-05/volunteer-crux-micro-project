@@ -15,33 +15,52 @@ interface CertificateProps {
 export function CertificateCard({ volunteerName, eventName, date, organizerName = "Volunteer Crux" }: CertificateProps) {
 
     const handlePrint = () => {
-        const cert = document.getElementById("printable-certificate");
-        if (!cert) return;
+        const originalCert = document.getElementById("printable-certificate");
+        if (!originalCert) return;
 
-        // Trace up the DOM tree to find the exact root container (Radix Portal) appended to the body
-        let portalRoot = cert;
-        while (portalRoot.parentElement && portalRoot.parentElement !== document.body) {
-            portalRoot = portalRoot.parentElement;
-        }
+        // Create a perfect static HTML clone of the certificate to manually bypass completely ALL Radix/Next.js layout traps
+        const certClone = originalCert.cloneNode(true) as HTMLElement;
+        certClone.id = "print-clone";
+        
+        // Force the clone into pristine Document Flow explicitly demanding 1024px to natively trigger 'Shrink-To-Fit'!
+        certClone.style.cssText = `
+            position: relative !important;
+            width: 1024px !important;
+            height: 724px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #fffdf5 !important;
+            transform: none !important;
+            box-shadow: none !important;
+            border: none !important;
+            max-width: none !important;
+            max-height: none !important;
+            overflow: hidden !important;
+        `;
 
-        // Explicitly hide every single other layout node on the webpage (Next.js Root, Headers, Dashboards) natively bypassing unpredictable UI frameworks!
+        // Explicitly hide every single other layout node on the website structurally to isolate the Document Matrix
         const hiddenNodes: { element: HTMLElement, originalDisplay: string }[] = [];
         Array.from(document.body.children).forEach(child => {
-            if (child !== portalRoot && child.tagName !== 'SCRIPT' && child.tagName !== 'STYLE' && child.tagName !== 'LINK') {
+            if (child.tagName !== 'SCRIPT' && child.tagName !== 'STYLE' && child.tagName !== 'LINK') {
                 const el = child as HTMLElement;
                 hiddenNodes.push({ element: el, originalDisplay: el.style.display });
                 el.style.display = 'none';
             }
         });
 
+        // Inject the isolated pristine clone natively as the ONLY physical object in the Document 
+        document.body.appendChild(certClone);
+
+        // Natively invoke print dialogue. Because Document is exactly 1024px, the browser intrinsically Shrinks-To-Fit!
         window.print();
 
-        // After the synchronous print dialogue finishes, cleanly restore the entire website instantly!
+        // Restore the layout flawlessly after the print dialogue releases the browser thread
         setTimeout(() => {
+            document.body.removeChild(certClone);
             hiddenNodes.forEach(node => {
                 node.element.style.display = node.originalDisplay;
             });
-        }, 500);
+        }, 100);
     };
 
     return (
@@ -51,41 +70,6 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
                 @media print {
                     @page { size: landscape; margin: 0; }
                     body { -webkit-print-color-adjust: exact; background: white !important; }
-
-                    /* Destroy the dark Radix Overlay */
-                    [data-radix-dialog-overlay] { display: none !important; }
-
-                    /* Break the Radix Transform trap constraints and explicitly reset centering */
-                    [role="dialog"] {
-                        transform: none !important;
-                        position: absolute !important;
-                        left: 0 !important;
-                        top: 0 !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        border: none !important;
-                        box-shadow: none !important;
-                        background: transparent !important;
-                        overflow: visible !important;
-                        width: 1024px !important;
-                        height: 724px !important;
-                        max-width: none !important;
-                    }
-
-                    /* Pin the Certificate perfectly to the top-left Document Root to securely trigger Shrink-To-Fit */
-                    #printable-certificate {
-                        position: absolute !important;
-                        left: 0 !important;
-                        top: 0 !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        width: 1024px !important;
-                        height: 724px !important;
-                        max-width: none !important;
-                        max-height: none !important;
-                        z-index: 99999 !important;
-                        background-color: #fffdf5 !important;
-                    }
                 }
             `}</style>
 
