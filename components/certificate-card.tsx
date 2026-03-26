@@ -37,27 +37,27 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
                     /* Break the Radix Transform trap constraints */
                     body [role="dialog"] {
                         transform: none !important;
-                        position: absolute !important;
-                        left: 0 !important;
-                        top: 0 !important;
+                        position: static !important;
                         margin: 0 !important;
                         padding: 0 !important;
-                        width: 100vw !important;
-                        height: 100vh !important;
-                        max-width: none !important;
                         border: none !important;
                         box-shadow: none !important;
+                        background: transparent !important;
                     }
 
-                    /* Pin the Certificate perfectly to the paper origin without structural collapse */
+                    /* Pin the Certificate perfectly to the paper origin and enforce rigid pixel boundaries to trigger native Shrink-to-Fit */
                     #printable-certificate {
-                        position: absolute !important;
+                        position: fixed !important;
                         left: 0 !important;
                         top: 0 !important;
                         margin: 0 !important;
                         padding: 0 !important;
-                        width: 100% !important;
-                        height: 100% !important;
+                        width: 1024px !important;
+                        height: 724px !important;
+                        max-width: none !important;
+                        max-height: none !important;
+                        z-index: 99999 !important;
+                        background-color: #fffdf5 !important;
                     }
                 }
             `}</style>
