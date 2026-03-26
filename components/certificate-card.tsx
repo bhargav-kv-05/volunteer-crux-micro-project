@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Award, Calendar, ExternalLink, ShieldCheck } from "lucide-react";
+import { Award, Calendar, ExternalLink, ShieldCheck, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface CertificateProps {
@@ -27,6 +27,16 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
                     body { -webkit-print-color-adjust: exact; }
                 }
             `}</style>
+
+            {/* Floating Action Bar - Anchored above the Certificate for visibility in tall Modals */}
+            <div className="mb-6 print:hidden flex flex-col items-center animate-in fade-in slide-in-from-top-4">
+                <Button onClick={handlePrint} size="lg" className="gap-2 bg-green-600 hover:bg-green-700 shadow-xl border border-green-500 text-white font-bold tracking-wide">
+                    <Download className="h-5 w-5" /> Download Certificate (Save as PDF)
+                </Button>
+                <p className="text-sm text-gray-200 mt-3 font-medium px-4 py-1 bg-black/40 rounded-full shadow-inner backdrop-blur-sm">
+                    In the Print Menu, select "Save as PDF" to download your copy.
+                </p>
+            </div>
 
             {/* The certificate is scaled dynamically. Removed aspect-ratio constraint to allow the background wrapper to dynamically extend around all child objects without clipping them out text. */}
             <Card className="relative w-full max-w-5xl min-h-[400px] md:min-h-[600px] mx-auto shadow-2xl bg-[#fffdf5] border-8 border-double border-green-800 print:shadow-none print:border-8 print:w-full print:h-full print:rounded-none scale-95 md:scale-100 pb-8">
@@ -97,11 +107,6 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
                 </CardContent>
             </Card>
 
-            <div className="mt-8 print:hidden">
-                <Button onClick={handlePrint} size="lg" className="gap-2 bg-green-700 hover:bg-green-800 shadow-lg">
-                    <ExternalLink className="h-5 w-5" /> Download / Print Certificate
-                </Button>
-            </div>
         </div>
     );
 }
