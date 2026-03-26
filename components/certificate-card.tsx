@@ -70,6 +70,12 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
                 @media print {
                     @page { size: landscape; margin: 0; }
                     body { -webkit-print-color-adjust: exact; background: white !important; }
+                    * { 
+                        box-shadow: none !important; 
+                        text-shadow: none !important; 
+                        filter: none !important; 
+                        backdrop-filter: none !important; 
+                    }
                 }
             `}</style>
 
@@ -111,10 +117,10 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
                     <div className="w-full max-w-3xl space-y-4 sm:space-y-6 py-4 md:py-8">
                         <p className="text-gray-500 italic text-lg font-serif">This certificate is proudly presented to</p>
 
-                        <p className="font-serif text-3xl sm:text-4xl md:text-6xl font-black text-slate-800 border-b-2 sm:border-b-4 border-green-700 pb-2 sm:pb-4 inline-block transform -rotate-1 px-4 sm:px-12 bg-white/50 rounded-xl shadow-sm">
+                        <p className="font-serif text-3xl sm:text-4xl md:text-6xl font-black text-slate-800 border-b-2 sm:border-b-4 border-green-700 pb-2 sm:pb-4 inline-block px-4 sm:px-12 bg-white/50 rounded-xl shadow-sm">
                             {volunteerName}
                         </p>
-                        <p className="text-gray-600 italic text-sm sm:text-base md:text-lg">
+                        <p className="text-gray-600 italic text-sm sm:text-base md:text-lg mt-4">
                             for their dedicated service and successful participation in the event
                         </p>
                         <p className="font-sans text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-green-900 border-t-2 sm:border-t-4 border-double border-green-300 pt-2 sm:pt-4 mx-4 sm:mx-16">
