@@ -15,15 +15,7 @@ interface CertificateProps {
 export function CertificateCard({ volunteerName, eventName, date, organizerName = "Volunteer Crux" }: CertificateProps) {
 
     const handlePrint = () => {
-        // Synchronously collapse the entire background Next.js application tree before printing
-        document.body.classList.add('hide-background-for-print');
-        
         window.print();
-        
-        // Restore background application immediately after the system Print Dialog launches
-        setTimeout(() => {
-            document.body.classList.remove('hide-background-for-print');
-        }, 1000);
     };
 
     return (
@@ -34,32 +26,39 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
                     @page { size: landscape; margin: 0; }
                     body { -webkit-print-color-adjust: exact; background: white !important; }
                     
-                    /* Violently strip the complex Radix Transform Centering that completely traps fixed coordinates! */
+                    /* Hide EVERYTHING in the DOM Visually */
+                    body * { visibility: hidden !important; }
+                    
+                    /* Unhide Exclusively the Certificate and its Children */
+                    #printable-certificate, #printable-certificate * {
+                        visibility: visible !important;
+                    }
+
+                    /* Break the Radix Transform trap constraints */
                     body [role="dialog"] {
+                        transform: none !important;
                         position: absolute !important;
                         left: 0 !important;
                         top: 0 !important;
-                        transform: none !important;
-                        width: 100vw !important;
-                        height: 100vh !important;
                         margin: 0 !important;
                         padding: 0 !important;
+                        width: 100vw !important;
+                        height: 100vh !important;
                         max-width: none !important;
                         border: none !important;
                         box-shadow: none !important;
-                        overflow: visible !important;
-                        background: white !important;
                     }
-                    /* Delete the dark modal backdrop overlay */
-                    body [data-radix-dialog-overlay] { display: none !important; }
-                    
-                    /* Hide EVERYTHING in the body natively during CTRL+P */
-                    body > *:not([data-radix-portal]) { display: none !important; }
-                }
-                
-                /* When Javascript triggers the print button, synchronously collapse everything except the Radix Portal box */
-                body.hide-background-for-print > *:not([data-radix-portal]) {
-                    display: none !important;
+
+                    /* Pin the Certificate perfectly to the paper origin without structural collapse */
+                    #printable-certificate {
+                        position: absolute !important;
+                        left: 0 !important;
+                        top: 0 !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        width: 100% !important;
+                        height: 100% !important;
+                    }
                 }
             `}</style>
 
