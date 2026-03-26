@@ -15,8 +15,8 @@ export async function PUT(req: Request) {
 
         const { currentPassword, newPassword } = await req.json();
 
-        if (!currentPassword || !newPassword) {
-            return NextResponse.json({ message: "Current and new passwords are required." }, { status: 400 });
+        if (!newPassword) {
+            return NextResponse.json({ message: "New password is required." }, { status: 400 });
         }
 
         if (newPassword.length < 6) {
@@ -30,20 +30,17 @@ export async function PUT(req: Request) {
             return NextResponse.json({ message: "User not found." }, { status: 404 });
         }
 
-        // Verify current password
-        // Note: Check if user has a password (might be OAuth only)
+        // Verify current password ONLY if the user already has one (e.g. they didn't sign up exclusively with OAuth)
         if (user.password) {
+            if (!currentPassword) {
+                return NextResponse.json({ message: "Current password is required to change it." }, { status: 400 });
+            }
             const isMatch = await bcrypt.compare(currentPassword, user.password);
             if (!isMatch) {
                 return NextResponse.json({ message: "Incorrect current password." }, { status: 400 });
             }
-        } else {
-            // Edge case: User logged in via Google but wants to set a password? 
-            // For now, let's assume they can't use this endpoint if they don't have a password set, 
-            // or we could allow it if valid currentPassword is empty? 
-            // Safer to block for now or require them to use "Forgot Password" to set initial password.
-            return NextResponse.json({ message: "Please use 'Forgot Password' to set a password for this account." }, { status: 400 });
         }
+        // If !user.password, the user is natively "Setting" their password for the very first time! Bypass legacy checks.
 
         // Hash new password
         const hashedPassword = await bcrypt.hash(newPassword, 10);

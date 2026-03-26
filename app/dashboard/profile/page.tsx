@@ -113,8 +113,12 @@ export default function ProfilePage() {
     }
 
     async function handleChangePassword() {
-        if (!passwordForm.currentPassword || !passwordForm.newPassword) {
-            alert("Please fill in all fields");
+        if (user?.hasPassword && !passwordForm.currentPassword) {
+            alert("Please enter your current password");
+            return;
+        }
+        if (!passwordForm.newPassword) {
+            alert("Please enter a new password");
             return;
         }
         if (passwordForm.newPassword !== passwordForm.confirmPassword) {
@@ -255,28 +259,30 @@ export default function ProfilePage() {
                             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
                                 <div>
                                     <h4 className="font-medium text-sm">Password</h4>
-                                    <p className="text-xs text-muted-foreground">Securely update your password.</p>
+                                    <p className="text-xs text-muted-foreground">{user?.hasPassword ? "Securely update your password." : "Set a secure password for your account."}</p>
                                 </div>
                                 <Dialog open={isPasswordOpen} onOpenChange={setIsPasswordOpen}>
                                     <DialogTrigger asChild>
-                                        <Button variant="outline" size="sm">Change Password</Button>
+                                        <Button variant="outline" size="sm">{user?.hasPassword ? "Change Password" : "Set Password"}</Button>
                                     </DialogTrigger>
                                     <DialogContent>
                                         <DialogHeader>
-                                            <DialogTitle>Change Password</DialogTitle>
+                                            <DialogTitle>{user?.hasPassword ? "Change Password" : "Set Password"}</DialogTitle>
                                             <DialogDescription>
-                                                Enter your current password and a new password below.
+                                                {user?.hasPassword ? "Enter your current password and a new password below." : "Enter a secure password to use for future email logins."}
                                             </DialogDescription>
                                         </DialogHeader>
                                         <div className="space-y-4 py-4">
-                                            <div className="space-y-2">
-                                                <Label>Current Password</Label>
-                                                <Input
-                                                    type="password"
-                                                    value={passwordForm.currentPassword}
-                                                    onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                                                />
-                                            </div>
+                                            {user?.hasPassword && (
+                                                <div className="space-y-2">
+                                                    <Label>Current Password</Label>
+                                                    <Input
+                                                        type="password"
+                                                        value={passwordForm.currentPassword}
+                                                        onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                                                    />
+                                                </div>
+                                            )}
                                             <div className="space-y-2">
                                                 <Label>New Password</Label>
                                                 <Input
@@ -298,7 +304,7 @@ export default function ProfilePage() {
                                             <Button variant="outline" onClick={() => setIsPasswordOpen(false)}>Cancel</Button>
                                             <Button onClick={handleChangePassword} disabled={passwordLoading}>
                                                 {passwordLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                                Update Password
+                                                {user?.hasPassword ? "Update Password" : "Set Password"}
                                             </Button>
                                         </DialogFooter>
                                     </DialogContent>

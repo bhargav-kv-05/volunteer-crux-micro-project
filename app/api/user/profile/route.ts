@@ -19,7 +19,11 @@ export async function GET() {
             return NextResponse.json({ message: "User not found" }, { status: 404 });
         }
 
-        return NextResponse.json(user, { status: 200 });
+        const userObj = user.toObject();
+        const hasPassword = !!userObj.password;
+        delete userObj.password; // Extremely important security measure: NEVER transmit hashes
+
+        return NextResponse.json({ ...userObj, hasPassword }, { status: 200 });
 
     } catch (error) {
         return NextResponse.json({ message: "Error fetching profile" }, { status: 500 });

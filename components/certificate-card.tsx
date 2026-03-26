@@ -28,8 +28,8 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
                 }
             `}</style>
 
-            {/* The certificate is scaled dynamically using w-full and an aspect ratio. Shrinking slightly using scale-95 to prevent cutting off corners on weird aspect ratio screens */}
-            <Card className="relative w-full max-w-5xl aspect-[1.414/1] min-h-[400px] md:min-h-[600px] mx-auto shadow-2xl bg-[#fffdf5] border-8 border-double border-green-800 print:shadow-none print:border-8 print:w-full print:h-full print:rounded-none overflow-hidden scale-95 md:scale-100">
+            {/* The certificate is scaled dynamically. Removed aspect-ratio constraint to allow the background wrapper to dynamically extend around all child objects without clipping them out text. */}
+            <Card className="relative w-full max-w-5xl min-h-[400px] md:min-h-[600px] mx-auto shadow-2xl bg-[#fffdf5] border-8 border-double border-green-800 print:shadow-none print:border-8 print:w-full print:h-full print:rounded-none scale-95 md:scale-100 pb-8">
 
                 {/* Decorative Corner Ornaments */}
                 <div className="absolute top-0 left-0 w-32 h-32 border-t-8 border-l-8 border-green-700 rounded-tl-3xl m-4 opacity-50"></div>
@@ -37,7 +37,7 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
                 <div className="absolute bottom-0 left-0 w-32 h-32 border-b-8 border-l-8 border-green-700 rounded-bl-3xl m-4 opacity-50"></div>
                 <div className="absolute bottom-0 right-0 w-32 h-32 border-b-8 border-r-8 border-green-700 rounded-br-3xl m-4 opacity-50"></div>
 
-                <CardContent className="flex flex-col items-center justify-center h-full p-16 text-center space-y-8 relative z-10">
+                <CardContent className="flex flex-col items-center justify-center h-full p-8 md:p-16 text-center space-y-6 md:space-y-8 relative z-10">
 
                     {/* Header */}
                     <div className="space-y-4">
@@ -70,7 +70,7 @@ export function CertificateCard({ volunteerName, eventName, date, organizerName 
                     </div>
 
                     {/* Footer / Signatures */}
-                    <div className="flex justify-between items-end w-full max-w-4xl px-12 mt-12 pt-12">
+                    <div className="flex justify-between items-end w-full max-w-4xl px-4 md:px-12 mt-8 md:mt-12 pt-8">
                         <div className="flex flex-col items-center gap-2">
                             <span className="font-serif text-xl border-b border-gray-400 pb-1 px-8 min-w-[200px] text-center">{date}</span>
                             <span className="text-xs uppercase tracking-widest text-gray-500">Date</span>
