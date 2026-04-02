@@ -7,6 +7,9 @@ const MessageSchema = new Schema(
             required: true,
             index: true // Indexed for extremely fast lookups when a user joins a room
         },
+        squadId: {
+            type: String // Optional: Only populated if this message specifically belongs to an isolated sub-squad
+        },
         userId: { type: String },
         user: { type: String, required: true },
         avatar: { type: String },

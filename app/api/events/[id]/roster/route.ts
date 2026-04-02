@@ -41,7 +41,8 @@ export async function GET(
                 draftedTeam: event.draftedTeam,
                 matchmakingRun: event.matchmakingRun,
                 spots: event.spots,
-                skills: event.skills
+                skills: event.skills,
+                squads: event.squads 
             },
             volunteers: event.volunteers
         });

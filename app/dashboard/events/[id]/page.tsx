@@ -22,6 +22,7 @@ interface Event {
     filled: number;
     volunteers: string[];
     draftedTeam?: string[];
+    squads?: { _id: string, name: string, members: string[] }[];
     matchmakingRun?: boolean;
     organizer: string;
     description?: string; // Future proofing
@@ -84,6 +85,7 @@ export default function EventDetailsPage() {
     const isOrganizer = session?.user?.id === event.organizer;
     const isJoined = event.volunteers.includes(session?.user?.id || "");
     const isDrafted = event.draftedTeam?.includes(session?.user?.id || "");
+    const mySquad = event.squads?.find(s => s.members.includes(session?.user?.id || ""));
     
     // Core Engine Control: ALL applicants can access the Group Chat. Only Drafted members unlock the specific Team Chat Tab.
     const canViewChat = isJoined || isOrganizer;
@@ -174,6 +176,8 @@ export default function EventDetailsPage() {
                                 eventTitle={event.title}
                                 organizerId={event.organizer}
                                 isDrafted={isDrafted || false}
+                                squadId={mySquad?._id}
+                                squadName={mySquad?.name}
                             />
                         </div>
                     )}

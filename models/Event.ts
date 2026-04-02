@@ -34,6 +34,15 @@ const EventSchema = new Schema(
             ref: "User"
         }],
 
+        // The exact, explicitly structured Sub-Teams generated natively by the Phase 20 Parsing Algorithm
+        squads: [{
+            name: { type: String }, // e.g. "Squad 1", "Logistics Team"
+            members: [{
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "User"
+            }]
+        }],
+
         // Has the Intelligent Matchmaking Algorithm been executed yet?
         matchmakingRun: {
             type: Boolean,

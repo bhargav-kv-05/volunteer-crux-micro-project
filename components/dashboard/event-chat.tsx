@@ -15,10 +15,10 @@ interface Message {
     message: string;
     timestamp: string;
     avatar?: string;
-    channel?: "group" | "team" | "announcements";
+    channel?: "group" | "team" | "announcements" | "squad";
 }
 
-export default function EventChat({ eventId, eventTitle, organizerId, isDrafted = false }: { eventId: string, eventTitle: string, organizerId: string, isDrafted?: boolean }) {
+export default function EventChat({ eventId, eventTitle, organizerId, isDrafted = false, squadId, squadName }: { eventId: string, eventTitle: string, organizerId: string, isDrafted?: boolean, squadId?: string, squadName?: string }) {
     const { socket, isConnected } = useSocket();
     const { data: session } = useSession();
     const searchParams = useSearchParams();
@@ -29,14 +29,14 @@ export default function EventChat({ eventId, eventTitle, organizerId, isDrafted 
     const isOrganizer = session?.user?.id === organizerId;
     
     // Dynamically retrieve the specific channel the user clicked from their Notifications panel
-    const queryChannel = searchParams?.get("channel") as "group" | "team" | "announcements" | null;
+    const queryChannel = searchParams?.get("channel") as "group" | "team" | "announcements" | "squad" | null;
     
     // Security Pass: Instantly reject a user if they maliciously inject ?channel=team into the URL but aren't mathematically drafted
     const safeInitialChannel = queryChannel === "team" && !isDrafted && !isOrganizer 
         ? "group" 
         : (queryChannel || (isDrafted ? "team" : "group"));
 
-    const [activeChannel, setActiveChannel] = useState<"group" | "team" | "announcements">(safeInitialChannel);
+    const [activeChannel, setActiveChannel] = useState<"group" | "team" | "announcements" | "squad">(safeInitialChannel);
 
     // Deep sync: Ensure Next.js client-side navigation (clicking via dropdown without hard refresh) updates the UI automatically
     useEffect(() => {
@@ -44,16 +44,22 @@ export default function EventChat({ eventId, eventTitle, organizerId, isDrafted 
             setActiveChannel("announcements");
         } else if (queryChannel === "team" && (isDrafted || isOrganizer)) {
             setActiveChannel("team");
+        } else if (queryChannel === "squad" && squadId) {
+            setActiveChannel("squad");
         } else if (queryChannel === "group") {
             setActiveChannel("group");
         }
-    }, [queryChannel, isDrafted, isOrganizer]);
+    }, [queryChannel, isDrafted, isOrganizer, squadId]);
 
     useEffect(() => {
         if (!socket || !isConnected) return;
 
-        // Join the event room
-        socket.emit("join_room", eventId);
+        // Dynamically toggle isolated WebSocket Sub-Rooms!
+        const payload = {
+            eventId,
+            squadId: activeChannel === "squad" ? squadId : undefined
+        };
+        socket.emit("join_room", payload);
 
         // Listen for incoming messages
         const handleMessage = (data: Message) => {
@@ -74,7 +80,7 @@ export default function EventChat({ eventId, eventTitle, organizerId, isDrafted 
             socket.off("receive_message", handleMessage);
             socket.off("chat_history", handleHistory);
         };
-    }, [socket, isConnected, eventId]);
+    }, [socket, isConnected, eventId, activeChannel, squadId]);
 
     // Auto-scroll to bottom
     useEffect(() => {
@@ -87,6 +93,7 @@ export default function EventChat({ eventId, eventTitle, organizerId, isDrafted 
 
         const messageData = {
             eventId,
+            squadId: activeChannel === "squad" ? squadId : undefined,
             user: session.user.name || "Anonymous",
             avatar: session.user.image,
             message: input,
@@ -136,6 +143,15 @@ export default function EventChat({ eventId, eventTitle, organizerId, isDrafted 
                                 className={`flex flex-1 items-center justify-center gap-2 text-sm font-medium py-2 rounded-md transition-all whitespace-nowrap px-3 ${activeChannel === "team" ? "bg-white shadow text-primary" : "text-gray-500 hover:text-gray-700"}`}
                             >
                                 <Lock className="h-4 w-4" /> Team Chat
+                            </button>
+                        )}
+                        
+                        {squadId && (
+                            <button
+                                onClick={() => setActiveChannel("squad")}
+                                className={`flex flex-1 items-center justify-center gap-2 text-sm font-medium py-2 rounded-md transition-all whitespace-nowrap px-3 ${activeChannel === "squad" ? "bg-green-600 shadow text-white" : "text-green-700 bg-green-50 hover:bg-green-100"}`}
+                            >
+                                <Lock className="h-4 w-4" /> {squadName || "My Squad"}
                             </button>
                         )}
 

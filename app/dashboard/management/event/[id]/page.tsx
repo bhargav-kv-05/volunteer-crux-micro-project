@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, CheckCircle2, XCircle, ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Loader2, CheckCircle2, XCircle, ArrowLeft, Users, Network } from "lucide-react";
 import Link from "next/link";
 
 interface Volunteer {
@@ -26,6 +27,7 @@ interface RosterData {
         matchmakingRun?: boolean;
         spots?: number;
         skills?: string[];
+        squads?: { name: string, members: string[] }[];
     };
     volunteers: Volunteer[];
 }
@@ -37,6 +39,8 @@ export default function AttendanceManagerPage() {
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState<string | null>(null);
     const [runningMatchmaker, setRunningMatchmaker] = useState(false);
+    const [runningSquadEngine, setRunningSquadEngine] = useState(false);
+    const [squadSize, setSquadSize] = useState("");
 
     useEffect(() => {
         async function fetchRoster() {
@@ -107,6 +111,30 @@ export default function AttendanceManagerPage() {
         }
     };
 
+    const generateSquads = async () => {
+        if (!confirm("Are you ready to recursively parse your drafted team into isolated Chat Squads? This cannot be undone easily.")) return;
+        setRunningSquadEngine(true);
+        try {
+            const res = await fetch(`/api/events/${id}/squads`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ squadSize: parseInt(squadSize) || undefined })
+            });
+            if (res.ok) {
+                const result = await res.json();
+                alert(result.message);
+                window.location.reload();
+            } else {
+                const error = await res.json();
+                alert(error.error);
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setRunningSquadEngine(false);
+        }
+    };
+
     if (loading) return <div className="flex h-96 items-center justify-center"><Loader2 className="animate-spin" /></div>;
     if (!data) return null;
 
@@ -144,6 +172,67 @@ export default function AttendanceManagerPage() {
                         >
                             {runningMatchmaker ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Execute Matchmaking Algorithm"}
                         </Button>
+                    </CardContent>
+                </Card>
+            )}
+
+            {data.event.matchmakingRun && (
+                <Card className="border-green-200 bg-green-50/20 mb-6">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-green-800">
+                            <Network className="h-5 w-5" /> Sub-Team (Squad) Parsing Engine
+                        </CardTitle>
+                        <CardDescription className="text-green-700">
+                            {data.event.squads && data.event.squads.length > 0 
+                                ? "Squads successfully generated! These groups are natively isolated in secure mathematical sub-rooms."
+                                : "Recursively break out your unified drafted team into precise Sub-Squads based on complementary skill balancing!"}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {(!data.event.squads || data.event.squads.length === 0) ? (
+                            <div className="flex gap-4 items-end">
+                                <div className="flex-1 space-y-2">
+                                    <label className="text-sm font-medium text-green-900">Preferred Squad Size (e.g. 5)</label>
+                                    <Input 
+                                        type="number" 
+                                        min="2" 
+                                        placeholder="Auto-calculate if left blank"
+                                        value={squadSize}
+                                        onChange={(e) => setSquadSize(e.target.value)}
+                                        className="border-green-300 focus-visible:ring-green-500"
+                                    />
+                                </div>
+                                <Button 
+                                    className="bg-green-600 hover:bg-green-700 text-white w-1/2" 
+                                    disabled={runningSquadEngine}
+                                    onClick={generateSquads}
+                                >
+                                    {runningSquadEngine ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Run Parsing Engine"}
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                                {data.event.squads.map((squad, idx) => (
+                                    <div key={idx} className="p-4 bg-white rounded-lg border border-green-100 shadow-sm">
+                                        <h4 className="font-bold text-green-900 mb-3 flex items-center gap-2">
+                                            <Users className="h-4 w-4" /> {squad.name} 
+                                            <Badge variant="outline" className="ml-auto">{squad.members.length} Members</Badge>
+                                        </h4>
+                                        <div className="flex flex-wrap gap-2">
+                                            {squad.members.map((memberId, midx) => {
+                                                const v = data.volunteers.find(vol => vol._id === memberId);
+                                                return v ? (
+                                                    <Avatar key={midx} className="h-8 w-8 border-2 border-green-50">
+                                                        <AvatarImage src={v.image} />
+                                                        <AvatarFallback className="text-xs">{v.name[0]}</AvatarFallback>
+                                                    </Avatar>
+                                                ) : null;
+                                            })}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </CardContent>
                 </Card>
             )}

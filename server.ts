@@ -69,13 +69,19 @@ app.prepare().then(() => {
     ioServer.on("connection", (socket) => {
         console.log("✅ Client connected to Socket.IO:", socket.id);
 
-        socket.on("join_room", async (eventId) => {
-            socket.join(eventId);
-            console.log(`User ${socket.id} joined room: ${eventId}`);
+        socket.on("join_room", async (payload) => {
+            // Backwards compatibility: if a string is passed, it's just eventId. If Object, extract parameters
+            const eventId = typeof payload === "string" ? payload : payload.eventId;
+            const squadId = payload.squadId;
+
+            const room = squadId ? `squad_${squadId}` : `event_${eventId}`;
+            socket.join(room);
+            console.log(`User ${socket.id} joined room: ${room}`);
             
             try {
-                // Fetch the latest 200 messages for this room, oldest first
-                const history = await Message.find({ eventId }).sort({ createdAt: 1 }).limit(200);
+                // Securely isolate chat history. If in a squad room, strictly fetch messages tied to that squad.
+                const query = squadId ? { eventId, squadId } : { eventId, squadId: { $exists: false } };
+                const history = await Message.find(query).sort({ createdAt: 1 }).limit(200);
                 socket.emit("chat_history", history);
             } catch (err) {
                 console.error("Error fetching chat history:", err);
@@ -83,10 +89,13 @@ app.prepare().then(() => {
         });
 
         socket.on("send_message", async (data) => {
+            const room = data.squadId && data.channel === "squad" ? `squad_${data.squadId}` : `event_${data.eventId}`;
+            
             try {
-                // Permanently save the message to MongoDB
+                // Permanently save the message to MongoDB isolated correctly
                 await Message.create({
                     eventId: data.eventId,
+                    squadId: data.channel === "squad" ? data.squadId : undefined,
                     user: data.user,
                     avatar: data.avatar,
                     message: data.message,
@@ -97,8 +106,8 @@ app.prepare().then(() => {
                 console.error("Error saving message:", err);
             }
 
-            // Instantly broadcast to everyone connected in the room
-            ioServer.to(data.eventId).emit("receive_message", data);
+            // Instantly broadcast to everyone connected in the correctly isolated room
+            ioServer.to(room).emit("receive_message", data);
         });
 
         socket.on("disconnect", () => {
