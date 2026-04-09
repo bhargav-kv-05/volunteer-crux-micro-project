@@ -6,6 +6,8 @@ import { Server } from "socket.io";
 import mongoose from "mongoose";
 import * as dotenv from "dotenv";
 import Message from "./models/Message";
+import Event from "./models/Event";
+import { getToken } from "next-auth/jwt";
 
 dotenv.config({ path: ".env" });
 
@@ -66,6 +68,26 @@ app.prepare().then(() => {
         });
     }
 
+    // --- SSWA: Sever-Side WebSocket Authentication Engine ---
+    ioServer.use(async (socket, next) => {
+        try {
+            const req = socket.request as any;
+            const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+            
+            if (!token) {
+                return next(new Error("Unauthorized: Invalid Session Token")); // Refuse connection entirely
+            }
+            
+            socket.data.userId = token.id;
+            socket.data.name = token.name;
+            socket.data.avatar = token.avatar;
+            next();
+        } catch (error) {
+            console.error("Socket authentication error:", error);
+            next(new Error("Authentication engine crashed"));
+        }
+    });
+
     ioServer.on("connection", (socket) => {
         console.log("✅ Client connected to Socket.IO:", socket.id);
 
@@ -73,18 +95,32 @@ app.prepare().then(() => {
             // Backwards compatibility: if a string is passed, it's just eventId. If Object, extract parameters
             const eventId = typeof payload === "string" ? payload : payload.eventId;
             const squadId = payload.squadId;
+            const userId = socket.data.userId;
 
-            const room = squadId ? `squad_${squadId}` : `event_${eventId}`;
-            socket.join(room);
-            console.log(`User ${socket.id} joined room: ${room}`);
-            
             try {
+                // Cryptographic validation of access rights
+                const event = await Event.findById(eventId);
+                if (!event) return;
+
+                if (squadId) {
+                    const targetSquad = event.squads?.find((s: any) => s._id.toString() === squadId);
+                    if (!targetSquad || !targetSquad.members.includes(userId)) {
+                        console.log(`[SECURITY] Blocked spoofed connection: ${userId} attempted to breach squad ${squadId}`);
+                        socket.emit("error", { message: "Unauthorized squad access." });
+                        return; // BLOCKED
+                    }
+                }
+
+                const room = squadId ? `squad_${squadId}` : `event_${eventId}`;
+                socket.join(room);
+                console.log(`User ${userId} joined room: ${room}`);
+                
                 // Securely isolate chat history. If in a squad room, strictly fetch messages tied to that squad.
                 const query = squadId ? { eventId, squadId } : { eventId, squadId: { $exists: false } };
                 const history = await Message.find(query).sort({ createdAt: 1 }).limit(200);
                 socket.emit("chat_history", history);
             } catch (err) {
-                console.error("Error fetching chat history:", err);
+                console.error("Error securing join_room:", err);
             }
         });
 
@@ -93,11 +129,12 @@ app.prepare().then(() => {
             
             try {
                 // Permanently save the message to MongoDB isolated correctly
+                // SECURE: Bind backend session data instead of trusting the API payload mapping
                 await Message.create({
                     eventId: data.eventId,
                     squadId: data.channel === "squad" ? data.squadId : undefined,
-                    user: data.user,
-                    avatar: data.avatar,
+                    user: socket.data.name || "Anonymous",
+                    avatar: socket.data.avatar,
                     message: data.message,
                     channel: data.channel || "group",
                     timestamp: data.timestamp
@@ -107,7 +144,11 @@ app.prepare().then(() => {
             }
 
             // Instantly broadcast to everyone connected in the correctly isolated room
-            ioServer.to(room).emit("receive_message", data);
+            ioServer.to(room).emit("receive_message", {
+                 ...data,
+                 user: socket.data.name || "Anonymous",
+                 avatar: socket.data.avatar
+            });
         });
 
         socket.on("disconnect", () => {
