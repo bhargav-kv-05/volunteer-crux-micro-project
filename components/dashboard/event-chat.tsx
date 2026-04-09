@@ -31,9 +31,11 @@ export default function EventChat({ eventId, eventTitle, organizerId, isDrafted 
     // Dynamically retrieve the specific channel the user clicked from their Notifications panel
     const queryChannel = searchParams?.get("channel") as "group" | "team" | "announcements" | "squad" | null;
     
-    // Security Pass: Instantly reject a user if they maliciously inject ?channel=team into the URL but aren't mathematically drafted
+    // Security Pass: Instantly reject a user if they maliciously inject ?channel=team into the URL but aren't mathematically drafted. Deep restrict Squad Chat if no SquadId is active.
     const safeInitialChannel = queryChannel === "team" && !isDrafted && !isOrganizer 
         ? "group" 
+        : queryChannel === "squad" && !squadId
+        ? "group"
         : (queryChannel || (isDrafted ? "team" : "group"));
 
     const [activeChannel, setActiveChannel] = useState<"group" | "team" | "announcements" | "squad">(safeInitialChannel);
@@ -108,7 +110,7 @@ export default function EventChat({ eventId, eventTitle, organizerId, isDrafted 
         fetch("/api/notifications/create", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ eventId, message: input, channel: activeChannel })
+            body: JSON.stringify({ eventId, squadId: activeChannel === "squad" ? squadId : undefined, message: input, channel: activeChannel })
         }).catch(err => console.error("Failed to insert notification", err));
 
         setInput("");

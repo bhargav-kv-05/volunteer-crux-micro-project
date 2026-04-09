@@ -12,7 +12,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
         }
 
-        const { eventId, message, channel } = await req.json();
+        const { eventId, squadId, message, channel } = await req.json();
         
         if (!eventId || !message) {
             return NextResponse.json({ message: "Missing fields" }, { status: 400 });
@@ -29,9 +29,26 @@ export async function POST(req: Request) {
         // 2. Identify all people involved using a Set so nobody gets duplicates
         const recipients = new Set<string>();
         
-        event.volunteers.forEach((v: any) => recipients.add(v.toString()));
-        if (event.organizer) {
-            recipients.add(event.organizer.toString());
+        if (channel === "squad" && squadId) {
+            // STRICT ISOLATION: Only notify members natively in that precise sub-team! Organizer literally does not exist here.
+            const squad = event.squads?.find((s: any) => s._id.toString() === squadId);
+            if (squad) {
+                squad.members.forEach((m: any) => recipients.add(m.toString()));
+            }
+        } else if (channel === "team") {
+            // STRATEGIC LAYER: Notify the mathematically drafted team explicitly and the Organizer supervisor.
+            if (event.draftedTeam && event.draftedTeam.length > 0) {
+                event.draftedTeam.forEach((v: any) => recipients.add(v.toString()));
+            } else {
+                event.volunteers.forEach((v: any) => recipients.add(v.toString()));
+            }
+            if (event.organizer) recipients.add(event.organizer.toString());
+        } else {
+            // GLOBAL BROADCAST: Announcements or 'group' lobby
+            event.volunteers.forEach((v: any) => recipients.add(v.toString()));
+            if (event.organizer) {
+                recipients.add(event.organizer.toString());
+            }
         }
 
         // VERY IMPORTANT: Prevent the sender from getting a notification for a message they literally just typed
