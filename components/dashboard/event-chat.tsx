@@ -167,10 +167,10 @@ export default function EventChat({ eventId, eventTitle, organizerId, isDrafted 
             <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
                 {filteredMessages.length === 0 ? (
                     <div className="text-center text-gray-400 mt-20 flex flex-col items-center gap-2">
-                        {activeChannel === "team" ? <Lock className="h-8 w-8 opacity-50" /> : activeChannel === "group" ? <Users className="h-8 w-8 opacity-50" /> : <Megaphone className="h-8 w-8 opacity-50" />}
-                        <p>No messages in {activeChannel === "team" ? "Secured Team Chat" : activeChannel === "group" ? "General Group Chat" : "Announcements"} yet.</p>
+                        {activeChannel === "squad" ? <Lock className="h-8 w-8 text-green-500 opacity-50" /> : activeChannel === "team" ? <Lock className="h-8 w-8 opacity-50" /> : activeChannel === "group" ? <Users className="h-8 w-8 opacity-50" /> : <Megaphone className="h-8 w-8 opacity-50" />}
+                        <p>No messages in {activeChannel === "squad" ? (squadName || "Isolated Squad Chat") : activeChannel === "team" ? "Secured Team Chat" : activeChannel === "group" ? "General Group Chat" : "Announcements"} yet.</p>
                         <p className="text-xs text-gray-500 max-w-[250px] mx-auto">
-                            {activeChannel === "team" ? "Strategize securely with your algorithmically selected squad!" : activeChannel === "group" ? "Chat and socialize with the entire applicant pool!" : isOrganizer ? "Post important updates here." : "Wait for official updates from the organizer here."}
+                            {activeChannel === "squad" ? "Coordinate micro-logistics secretly with your sub-team!" : activeChannel === "team" ? "Strategize securely with your algorithmically selected squad!" : activeChannel === "group" ? "Chat and socialize with the entire applicant pool!" : isOrganizer ? "Post important updates here." : "Wait for official updates from the organizer here."}
                         </p>
                     </div>
                 ) : (
