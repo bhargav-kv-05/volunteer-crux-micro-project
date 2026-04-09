@@ -1,0 +1,157 @@
+# Task Checklist - Volunteer Crux Enhancement
+
+- [x] **Phase 1: Planning & Setup**
+    - [x] Explore codebase to locate Landing Page, Login Page, and Navigation components.
+    - [x] Create `implementation_plan.md`.
+
+- [x] **Phase 2: Core Auth Implementation**
+    - [x] Create `middleware.ts` to protect `/dashboard` routes.
+    - [x] Create `app/register/page.tsx` for User Registration.
+    - [x] Add Password Visibility Toggle to Login Page.
+
+- [x] **Phase 3: Dashboard Architecture & Navigation**
+    - [x] Create `app/dashboard/layout.tsx` to standardize Sidebar/Header.
+    - [x] Implement Sidebar active states and links.
+    - [x] Create placeholder pages for `/dashboard/events`, `/dashboard/team`, `/dashboard/management`.
+    - [x] Update `DashboardHeader` with User Dropdown (Sign Out, Profile).
+
+- [x] **Phase 4: Dashboard Feature - Filters**
+    - [x] Replace category buttons with a `Select` dropdown.
+    - [x] Add "City/Location" `Select` filter.
+    - [x] Refactor `VolunteerView` to use new filter logic.
+
+- [x] **Phase 5: Landing Page Fixes**
+    - [x] Wire up "Get Started" and "Login as NGO" buttons.
+
+- [x] **Phase 6: Verification**
+    - [x] Verify Registration -> Login flow.
+    - [x] Verify Middleware protection (try accessing dashboard while logged out).
+    - [x] Verify Sidebar navigation.
+    - [x] Verify Filters.
+    - [x] Create `walkthrough.md`.
+
+- [x] **Phase 2: Intelligent Team Matching**
+    - [x] **Data & Profile**:
+        - [x] Add `skills` to `User` schema.
+        - [x] Create `/api/user/profile` endpoint to update skills.
+        - [x] Build "Skills Manager" UI in `/dashboard/profile`.
+    - [x] **Algorithm & UI**:
+        - [x] Update `VolunteerView` to calculate "Match Efficiency".
+        - [x] Display compatibility badges on events.
+        - [x] Verify persistence and UI sorting.
+- [x] **Phase 3: Participation (My Team)**
+    - [x] Create `/api/events/join` endpoint.
+    - [x] Implement "Register Now" button in Volunteer View.
+    - [x] Build `/dashboard/team` page to list joined events.
+
+- [x] **Phase 4: Event Management**
+    - [x] Create `/api/events` POST endpoint.
+    - [x] Build `/dashboard/management` page with Create Event form.
+
+- [x] **Phase 7: Security & Trust (NGO Flow)**
+    - [x] Create `/join-ngo` contact page.
+    - [x] Remove public "Join as NGO" option from register form.
+    - [x] Restrict `/dashboard/management` to 'ngo' role only.
+
+- [x] **Phase 8: Event Details & Navigation**
+    - [x] Create `/api/events/[id]` endpoint.
+    - [x] Build `/dashboard/events/[id]` dynamic page.
+    - [x] Fix "View Details" link in Dashboard Home.
+
+- [x] **Phase 9: Certificate & Attendance System**
+    - [x] Update `Event` schema with `attendees` array.
+    - [x] Create `/api/events/attendance` endpoint.
+    - [x] Build NGO Attendance Manager in `/dashboard/management/event/[id]`.
+    - [x] Build Volunteer Certificate View in `/dashboard/certificates`.
+
+- [x] **Phase 10: Gamification & Leaderboard**
+    - [x] **Schema & Data**:
+        - [x] Add `points` and `avatar` to `User` schema.
+        - [x] Update `attendance` API to award points on verification.
+    - [x] **Profile Enhancements**:
+        - [x] Add Avatar selection in `/dashboard/profile`.
+        - [x] Display "Total Impact Points" on Profile and Dashboard.
+    - [x] **Leaderboard**:
+        - [x] Create `/api/leaderboard` endpoint.
+        - [x] Build `/dashboard/leaderboard` page.
+    - [x] **Navigation**:
+        - [x] Add "Leaderboard" to Sidebar.
+
+- [x] **Phase 11: Polish**
+    - [x] Fix "Email Organizer" links in Team Page.
+    - [x] Fix "My Team" page orphan events.
+
+- [x] **Phase 12: Google Authentication**
+    - [x] Schema Update (Optional Password).
+    - [x] Add `GoogleProvider` to NextAuth.
+    - [x] Implement `signIn` callback for User Sync (MongoDB).
+    - [x] Add "Sign in with Google" button.
+- [x] **Phase 13: Email Verification (Manual Signup)**
+    - [x] Update `User` schema (`verifyToken`, `verifyTokenExpiry`).
+    - [x] Update `/api/auth/register` to generate token & send email.
+    - [x] Implement Real Email Sending (Nodemailer).
+    - [x] Create `/verify-email/page.tsx`.
+    - [x] Block unverified users in NextAuth `authorize` callback.
+
+- [x] **Phase 11: Real-Time Communication (Socket.io)**
+    - [x] Install `socket.io` and `socket.io-client`.
+    - [x] Create Custom Server (`server.ts`).
+    - [x] Update `package.json` scripts (`dev`, `start`).
+    - [x] Create `SocketProvider` for client connection.
+    - [x] Create `ChatWindow` component (UI).
+    - [x] Integrate Chat into Event Page (`/dashboard/events/[id]`).
+    - [x] Add Chat Access to Team Page (`/dashboard/team`).
+    - [x] Debug Connection Issues (CORS, Transport Upgrade).
+
+- [x] **Phase 12: UX & Profile Polish**
+    - [x] Update "Email Organizer" link in Team Page.
+    - [x] **Profile Page**:
+        - [x] Add "Update Name" form.
+        - [x] Add "Change Password" form.
+        - [x] Add Avatar URL input.
+
+- [x] **Phase 13: Password Reset**
+    - [x] Create `forgot-password` page & API.
+    - [x] Create `reset-password` page & API.
+- [x] **Phase 14: Deployment (Render/Koyeb)**
+    - [x] Refactor `server.ts` for Single Port (Next.js + Socket.IO).
+    - [x] Update `socket-provider.tsx` for Production URL.
+    - [x] Update `package.json` scripts (`build`, `start`).
+    - [x] Create `deployment_guide.md`.
+    - [x] Push to original repository (bhargav-kv-05)
+    - [x] Deploy to Koyeb using original repository
+    - [x] Monitor Koyeb build and WebSocket connection
+
+- [x] **Phase 15: Auth & Email Polish (Priority)**
+    - [x] Fix Email Sending in Production (Switched from Brevo to Nodemailer + Gmail).
+    - [x] Update Profile "Change Password" to include "Confirm Password" field.
+    - [x] Verify Forgot/Reset Password flow urls.
+
+- [x] **Phase 16: Chat Persistence & Polish (Completed)**
+    - [x] Create `Message` schema in MongoDB.
+    - [x] Update `server.ts` to save messages to DB.
+    - [x] Update `server.ts` to load history on `join_room`.
+    - [x] Update `event-chat.tsx` to display history and user details.
+    - [x] Verify profile picture consistency in chat.
+
+- [x] **Phase 17: NGO Flow & Sample Data Testing (Completed)**
+    - [x] Create 1-2 sample "NGO" user accounts (verified and with 'ngo' role).
+    - [x] Test the flow for creating new volunteer Events using NGO accounts.
+    - [x] Verify role-based dashboard restrictions (NGO vs. Volunteer).
+
+- [x] **Phase 18: Notification System Build (Completed)**
+    - [x] Build `Notification` MongoDB Schema.
+    - [x] Create API endpoints for auto-generating and fetching unread alerts.
+    - [x] Transform header Bell icon into a data-driven dropdown UI.
+
+- [x] **Phase 19: Intelligent Team Formation Engine**
+    - [x] Implement the "Complementary Skill-Based Team Formation" Algorithm.
+    - [x] Dynamically score volunteers based on intersecting event requirements.
+    - [x] Assign accepted volunteers to official `rooms` and lock out un-matched users.
+
+- [x] **Phase 20: Squad Parsing (Sub-Teams)**
+    - [x] Update `Event` and `Message` schemas to natively support nested squads (e.g., dividing 50 volunteers into 10 squads of 5).
+    - [x] Develop the recursive array-splitting algorithm to balance members evenly based on skill metrics.
+    - [x] Generate unique, explicitly isolated chat rooms for each sub-squad.
+    - [x] Integrate a UI for the NGO Organizer to manually inspect or shuffle generated squads.
+

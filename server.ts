@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 import * as dotenv from "dotenv";
 import Message from "./models/Message";
 import Event from "./models/Event";
-import { getToken } from "next-auth/jwt";
+import { decode } from "next-auth/jwt";
 
 dotenv.config({ path: ".env" });
 
@@ -72,10 +72,25 @@ app.prepare().then(() => {
     ioServer.use(async (socket, next) => {
         try {
             const req = socket.request as any;
-            const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+            
+            // Raw Node Sockets lack req.cookies, so we manually mathematically parse them
+            const cookieHeader = req.headers.cookie || "";
+            const cookies = Object.fromEntries(cookieHeader.split("; ").map((c: string) => {
+                const [key, ...v] = c.split("=");
+                return [key, decodeURIComponent(v.join("="))];
+            }));
+            
+            const sessionToken = cookies["__Secure-next-auth.session-token"] || cookies["next-auth.session-token"];
+            
+            if (!sessionToken) {
+                return next(new Error("Unauthorized: Missing Session Token")); 
+            }
+
+            // Forcibly decrypt the raw JWT instead of relying on getToken's Express-like abstractions
+            const token = await decode({ token: sessionToken, secret: process.env.NEXTAUTH_SECRET! });
             
             if (!token) {
-                return next(new Error("Unauthorized: Invalid Session Token")); // Refuse connection entirely
+                return next(new Error("Unauthorized: Invalid Session Token"));
             }
             
             socket.data.userId = token.id;
