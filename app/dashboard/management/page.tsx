@@ -208,7 +208,7 @@ export default function ManagementPage() {
 
             {/* My Created Events Section */}
             <div>
-                <h2 className="text-xl font-semibold mb-4">Your Events</h2>
+                <h2 className="text-xl font-semibold mb-4">{session?.user?.role === "admin" ? "Global Platform Events" : "Your Events"}</h2>
                 <div className="space-y-4">
                     {myEvents.length === 0 ? (
                         <p className="text-gray-500 text-sm">You haven't created any events yet.</p>

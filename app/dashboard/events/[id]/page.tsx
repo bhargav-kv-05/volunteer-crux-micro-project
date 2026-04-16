@@ -82,7 +82,9 @@ export default function EventDetailsPage() {
     if (loading) return <div className="flex h-96 items-center justify-center"><Loader2 className="animate-spin text-green-600" /></div>;
     if (!event) return null;
 
-    const isOrganizer = session?.user?.id === event.organizer || session?.user?.role === "admin";
+    const isAdmin = session?.user?.role === "admin";
+    const isTrueOrganizer = session?.user?.id === event.organizer;
+    const isOrganizer = isTrueOrganizer || isAdmin;
     const isJoined = event.volunteers.includes(session?.user?.id || "");
     const isDrafted = event.draftedTeam?.includes(session?.user?.id || "");
     const mySquad = event.squads?.find(s => s.members.includes(session?.user?.id || ""));
@@ -189,18 +191,18 @@ export default function EventDetailsPage() {
                         <CardContent className="p-6 space-y-6">
                             <div className="text-center space-y-1">
                                 <p className="text-sm text-gray-500">Status</p>
-                                <div className="text-xl font-bold text-green-700">
-                                    {isOrganizer ? "You are the Organizer" : isFull ? "Applications Closed" : "Open for Volunteers"}
+                                <div className={`text-xl font-bold ${isAdmin ? 'text-purple-700' : 'text-green-700'}`}>
+                                    {isAdmin ? "Super Admin Override" : isTrueOrganizer ? "You are the Organizer" : isFull ? "Applications Closed" : "Open for Volunteers"}
                                 </div>
                             </div>
 
                             <Button
-                                className={`w-full h-12 text-lg ${isJoined ? "bg-green-100 text-green-800 hover:bg-green-200" : isOrganizer ? "bg-blue-100 text-blue-800 hover:bg-blue-200" : "bg-green-600 hover:bg-green-700"}`}
+                                className={`w-full h-12 text-lg ${isJoined ? "bg-green-100 text-green-800 hover:bg-green-200" : isOrganizer ? (isAdmin ? "bg-purple-100 text-purple-800 hover:bg-purple-200" : "bg-blue-100 text-blue-800 hover:bg-blue-200") : "bg-green-600 hover:bg-green-700"}`}
                                 onClick={handleJoin}
                                 disabled={isJoined || isFull || joining || isOrganizer || event.matchmakingRun}
                             >
                                 {joining ? <Loader2 className="animate-spin" /> : isOrganizer ? (
-                                    <span className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5" /> Managing Event</span>
+                                    <span className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5" /> {isAdmin ? "Global Admin Access" : "Managing Event"}</span>
                                 ) : event.matchmakingRun ? (
                                     isDrafted ? <span className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5" /> Select Team</span> : "Not Selected"
                                 ) : isJoined ? (
@@ -209,7 +211,7 @@ export default function EventDetailsPage() {
                             </Button>
 
                             <div className="text-center text-xs text-gray-400">
-                                {isOrganizer ? "Manage your event from the Management tab." : "By registering, you commit to attending the event on the scheduled date."}
+                                {isAdmin ? "You possess absolute remote database authority over this target." : isTrueOrganizer ? "Manage your event from the Management tab." : "By registering, you commit to attending the event on the scheduled date."}
                             </div>
                         </CardContent>
                     </Card>
