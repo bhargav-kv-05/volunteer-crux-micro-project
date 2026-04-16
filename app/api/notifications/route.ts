@@ -61,3 +61,40 @@ export async function PATCH(req: Request) {
         return NextResponse.json({ message: "Server error" }, { status: 500 });
     }
 }
+
+export async function DELETE(req: Request) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session || !session.user) {
+            return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+        }
+
+        const { searchParams } = new URL(req.url);
+        const notificationId = searchParams.get("id");
+
+        if (!notificationId) {
+            return NextResponse.json({ message: "No ID provided" }, { status: 400 });
+        }
+
+        await connectToDatabase();
+
+        if (notificationId === "ALL") {
+            await Notification.deleteMany({ userId: session.user.id });
+            return NextResponse.json({ success: true, message: "All notifications cleared." });
+        }
+
+        const result = await Notification.findOneAndDelete({ 
+            _id: notificationId, 
+            userId: session.user.id 
+        });
+
+        if (!result) {
+            return NextResponse.json({ message: "Notification not found" }, { status: 404 });
+        }
+
+        return NextResponse.json({ success: true, message: "Notification removed." });
+    } catch (error) {
+        console.error("Error deleting notification:", error);
+        return NextResponse.json({ message: "Server error" }, { status: 500 });
+    }
+}

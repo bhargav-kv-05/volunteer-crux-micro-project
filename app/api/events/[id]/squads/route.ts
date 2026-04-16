@@ -13,7 +13,7 @@ export async function POST(
         const { id } = await params;
         const session = await getServerSession(authOptions);
 
-        if (!session || session.user.role !== "ngo") {
+        if (!session || (session.user.role !== "ngo" && session.user.role !== "admin")) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
@@ -32,7 +32,7 @@ export async function POST(
             return NextResponse.json({ error: "Event not found" }, { status: 404 });
         }
 
-        if (event.organizer.toString() !== session.user.id) {
+        if (event.organizer.toString() !== session.user.id && session.user.role !== "admin") {
             return NextResponse.json({ error: "Unauthorized to manage this event" }, { status: 401 });
         }
 

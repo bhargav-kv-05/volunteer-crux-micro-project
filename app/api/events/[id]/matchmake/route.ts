@@ -12,9 +12,9 @@ export async function POST(
     try {
         const session = await getServerSession(authOptions);
 
-        // Security check: must be NGO
-        if (!session || session.user.role !== "ngo") {
-            return NextResponse.json({ message: "Unauthorized. Only NGOs can run Matchmaking." }, { status: 401 });
+        // Security check: must be NGO or Admin
+        if (!session || (session.user.role !== "ngo" && session.user.role !== "admin")) {
+            return NextResponse.json({ message: "Unauthorized. Only NGOs or Admins can run Matchmaking." }, { status: 401 });
         }
 
         await connectToDatabase();
@@ -32,8 +32,8 @@ export async function POST(
             return NextResponse.json({ message: "Event not found" }, { status: 404 });
         }
 
-        // Security: ensure the explicit person running this is the verified organizer of this specific event
-        if (event.organizer.toString() !== session.user.id) {
+        // Security: ensure the explicit person running this is the verified organizer or Admin
+        if (event.organizer.toString() !== session.user.id && session.user.role !== "admin") {
             return NextResponse.json({ message: "You are not authorized to matchmake this event." }, { status: 403 });
         }
 

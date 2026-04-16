@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Bell, Search } from "lucide-react"
+import { Bell, Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -66,6 +66,22 @@ export function DashboardHeader() {
       });
   };
 
+  const clearNotification = async (id: string, e?: React.MouseEvent) => {
+      if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+      }
+      
+      // Optimistically wipe from standard UI instantly without backend delay lag mapping
+      if (id === "ALL") {
+          setNotifications([]);
+      } else {
+          setNotifications(prev => prev.filter(n => n._id !== id));
+      }
+      
+      await fetch(`/api/notifications?id=${id}`, { method: "DELETE" });
+  };
+
   // Get initials for avatar fallback
   const getInitials = (name: string | null | undefined) => {
     if (!name) return "U";
@@ -105,11 +121,18 @@ export function DashboardHeader() {
           <DropdownMenuContent align="end" className="w-80 overflow-hidden p-0">
             <div className="flex items-center justify-between px-4 py-3 bg-gray-50/80 border-b">
                 <span className="font-semibold text-sm">Notifications</span>
-                {unreadCount > 0 && (
-                    <Button variant="ghost" size="sm" className="h-auto p-0 text-xs text-blue-600 hover:text-blue-800 font-medium" onClick={markAllAsRead}>
-                        Mark all read
-                    </Button>
-                )}
+                <div className="flex gap-3">
+                    {unreadCount > 0 && (
+                        <Button variant="ghost" size="sm" className="h-auto p-0 text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors" onClick={markAllAsRead}>
+                            Read all
+                        </Button>
+                    )}
+                    {notifications.length > 0 && (
+                        <Button variant="ghost" size="sm" className="h-auto p-0 text-xs text-slate-400 hover:text-red-600 font-medium transition-colors" onClick={() => clearNotification("ALL")}>
+                            Clear all
+                        </Button>
+                    )}
+                </div>
             </div>
             <div className="max-h-[350px] overflow-y-auto">
                 {notifications.length === 0 ? (
@@ -121,15 +144,25 @@ export function DashboardHeader() {
                     </div>
                 ) : (
                     notifications.map(n => (
-                        <DropdownMenuItem key={n._id} className={`p-4 border-b border-gray-50 cursor-pointer flex flex-col items-start gap-1 rounded-none transition-colors ${!n.isRead ? 'bg-blue-50/40 hover:bg-blue-50/60' : 'hover:bg-gray-50'}`} onClick={() => markAsRead(n._id)} asChild>
-                            <Link href={n.link} className="w-full">
-                                <div className="flex items-start justify-between w-full mb-1">
-                                    <span className={`text-sm ${!n.isRead ? 'font-semibold text-gray-900' : 'font-medium text-gray-700'} line-clamp-1`}>{n.title}</span>
-                                    {!n.isRead && <span className="h-2 w-2 rounded-full bg-blue-500 shrink-0 mt-1.5 ml-3" />}
-                                </div>
-                                <span className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{n.message}</span>
-                            </Link>
-                        </DropdownMenuItem>
+                        <div key={n._id} className="relative group">
+                            <DropdownMenuItem className={`p-4 border-b border-gray-50 cursor-pointer flex flex-col items-start gap-1 rounded-none transition-colors pr-10 ${!n.isRead ? 'bg-blue-50/40 hover:bg-blue-50/60' : 'hover:bg-gray-50'}`} onClick={() => markAsRead(n._id)} asChild>
+                                <Link href={n.link} className="w-full">
+                                    <div className="flex items-start justify-between w-full mb-1">
+                                        <span className={`text-sm ${!n.isRead ? 'font-semibold text-gray-900' : 'font-medium text-gray-700'} line-clamp-1`}>{n.title}</span>
+                                        {!n.isRead && <span className="h-2 w-2 rounded-full bg-blue-500 shrink-0 mt-1.5 ml-2" />}
+                                    </div>
+                                    <span className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{n.message}</span>
+                                </Link>
+                            </DropdownMenuItem>
+                            <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="absolute top-1/2 -translate-y-1/2 right-2 h-7 w-7 p-0 text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100 z-10"
+                                onClick={(e) => clearNotification(n._id, e as any)}
+                            >
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
                     ))
                 )}
             </div>

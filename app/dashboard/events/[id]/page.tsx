@@ -82,7 +82,7 @@ export default function EventDetailsPage() {
     if (loading) return <div className="flex h-96 items-center justify-center"><Loader2 className="animate-spin text-green-600" /></div>;
     if (!event) return null;
 
-    const isOrganizer = session?.user?.id === event.organizer;
+    const isOrganizer = session?.user?.id === event.organizer || session?.user?.role === "admin";
     const isJoined = event.volunteers.includes(session?.user?.id || "");
     const isDrafted = event.draftedTeam?.includes(session?.user?.id || "");
     const mySquad = event.squads?.find(s => s.members.includes(session?.user?.id || ""));

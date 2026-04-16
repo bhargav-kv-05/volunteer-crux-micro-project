@@ -19,7 +19,7 @@ export default function ManagementPage() {
     const [loading, setLoading] = useState(false);
 
     // --- Access Control Check ---
-    if (!session || session.user.role !== "ngo") {
+    if (!session || (session.user.role !== "ngo" && session.user.role !== "admin")) {
         return (
             <div className="flex flex-col items-center justify-center h-[60vh] text-center p-4">
                 <div className="bg-red-100 p-4 rounded-full mb-4">
@@ -60,12 +60,32 @@ export default function ManagementPage() {
             const res = await fetch("/api/events");
             if (res.ok) {
                 const allEvents = await res.json();
-                // Client-side filter for MVP. Ideally API supports ?organizer=ID
-                const mine = allEvents.filter((e: any) => e.organizer === session?.user?.id);
+                // SUPER ADMIN ENGINE: Admin strictly bypasses structural encapsulation layer to visibly index ALL database events organically
+                const mine = session?.user?.role === "admin" 
+                    ? allEvents 
+                    : allEvents.filter((e: any) => e.organizer === session?.user?.id);
                 setMyEvents(mine);
             }
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    const handleDeleteEvent = async (eventId: string) => {
+        if (!confirm("CRITICAL WARNING: This will permanently eradicate the event and disband all sub-squads. Proceed?")) return;
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/events/${eventId}`, { method: "DELETE" });
+            if (res.ok) {
+                alert("Event effectively shattered globally.");
+                fetchEvents();
+            } else {
+                alert("Server denied deletion request structurally.");
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -201,16 +221,21 @@ export default function ManagementPage() {
                                         <h3 className="font-semibold">{event.title}</h3>
                                         <p className="text-sm text-gray-500">{event.date} • {event.location}</p>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <Button asChild variant="default">
-                                            <a href={`/dashboard/events/${event._id}`}>
-                                                Open Team Chat
-                                            </a>
-                                        </Button>
-                                        <Button asChild variant="outline">
-                                            <a href={`/dashboard/management/event/${event._id}`}>
-                                                Manage Attendance
-                                            </a>
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-center gap-2">
+                                            <Button asChild variant="default">
+                                                <a href={`/dashboard/events/${event._id}`}>
+                                                    Open Team Chat
+                                                </a>
+                                            </Button>
+                                            <Button asChild variant="outline">
+                                                <a href={`/dashboard/management/event/${event._id}`}>
+                                                    Manage Attendance
+                                                </a>
+                                            </Button>
+                                        </div>
+                                        <Button variant="destructive" size="sm" onClick={() => handleDeleteEvent(event._id)}>
+                                            Delete Event Node
                                         </Button>
                                     </div>
                                 </div>

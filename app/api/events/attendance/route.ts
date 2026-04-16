@@ -9,9 +9,9 @@ export async function POST(req: Request) {
     try {
         const session = await getServerSession(authOptions);
 
-        // 1. Auth Check: Must be NGO
-        if (!session || !session.user || session.user.role !== "ngo") {
-            return NextResponse.json({ message: "Unauthorized. NGO access only." }, { status: 403 });
+        // 1. Auth Check: Must be NGO or Admin
+        if (!session || !session.user || (session.user.role !== "ngo" && session.user.role !== "admin")) {
+            return NextResponse.json({ message: "Unauthorized. NGO or Admin access only." }, { status: 403 });
         }
 
         const { eventId, volunteerId, attended } = await req.json();
@@ -27,9 +27,9 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: "Event not found" }, { status: 404 });
         }
 
-        // 2. Ownership Check: Only the organizer can mark attendance
+        // 2. Ownership Check: Only the organizer or admin can mark attendance
         // Note: converting to string for comparison is safer with MongoDB ObjectIds
-        if (event.organizer.toString() !== session.user.id) {
+        if (event.organizer.toString() !== session.user.id && session.user.role !== "admin") {
             return NextResponse.json({ message: "Unauthorized. You are not the organizer." }, { status: 403 });
         }
 

@@ -27,8 +27,8 @@ export async function GET(
             return NextResponse.json({ message: "Event not found" }, { status: 404 });
         }
 
-        // Security: Only organizer can see the full roster
-        if (event.organizer.toString() !== session.user.id) {
+        // Security: Only organizer or admin can see the full roster
+        if (event.organizer.toString() !== session.user.id && session.user.role !== "admin") {
             return NextResponse.json({ message: "Unauthorized: You are not the organizer." }, { status: 403 });
         }
 
