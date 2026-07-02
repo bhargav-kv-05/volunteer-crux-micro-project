@@ -25,3 +25,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local utility scripts and system files
+.DS_Store
+task.txt
+task.md
+make-admin.js
+seed_squads.ts
+setup_demo.ts
+check_db.ts
